@@ -1,23 +1,20 @@
-//
-// Created by gabr on 11.04.24.
-//
 #ifndef SERVER_H
 #define SERVER_H
 
-#include "network.h"
-#include "connection.h"
+#include <iostream>
+#include <unistd.h>
+#include <netinet/in.h>
 
-class Server {
-private:
-    Network* network;
-    int backlog;
+#include "../include/socket_utils.h"
+#include "../include/command_handler.h"
 
-public:
-    Server(int port, int backlog);
-    ~Server();
+#define MAXLINE 4096 /*max text line length*/
+#define LISTENQ 8 /*maximum number of client connections*/
 
-    void start();
-    void handleClient(int connfd);
-};
+using namespace std;
 
-#endif // SERVER_H
+int create_socket(int);
+int accept_conn(int);
+void accept_client_connections(int listenfd, int data_port, const char* root_dir);
+
+#endif /* SERVER_H */
