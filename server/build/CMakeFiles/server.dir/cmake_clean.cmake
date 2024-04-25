@@ -1,6 +1,14 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/server.dir/src/ftp_commands.cpp.o"
+  "CMakeFiles/server.dir/src/ftp_commands.cpp.o.d"
   "CMakeFiles/server.dir/src/main.cpp.o"
   "CMakeFiles/server.dir/src/main.cpp.o.d"
+  "CMakeFiles/server.dir/src/server.cpp.o"
+  "CMakeFiles/server.dir/src/server.cpp.o.d"
+  "CMakeFiles/server.dir/src/socket.cpp.o"
+  "CMakeFiles/server.dir/src/socket.cpp.o.d"
+  "CMakeFiles/server.dir/src/utilities.cpp.o"
+  "CMakeFiles/server.dir/src/utilities.cpp.o.d"
   "server"
   "server.pdb"
 )

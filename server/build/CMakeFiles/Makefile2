@@ -63,7 +63,7 @@ CMAKE_BINARY_DIR = /home/gabr/Projects/GitHub/Cloud-archive-Project/server/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/CloudArchiveServer.dir/all
+all: CMakeFiles/server.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -71,34 +71,34 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/CloudArchiveServer.dir/clean
+clean: CMakeFiles/server.dir/clean
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/CloudArchiveServer.dir
+# Target rules for target CMakeFiles/server.dir
 
 # All Build rule for target.
-CMakeFiles/CloudArchiveServer.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CloudArchiveServer.dir/build.make CMakeFiles/CloudArchiveServer.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CloudArchiveServer.dir/build.make CMakeFiles/CloudArchiveServer.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/gabr/Projects/GitHub/Cloud-archive-Project/server/build/CMakeFiles --progress-num=1,2,3,4,5,6 "Built target CloudArchiveServer"
-.PHONY : CMakeFiles/CloudArchiveServer.dir/all
+CMakeFiles/server.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/gabr/Projects/GitHub/Cloud-archive-Project/server/build/CMakeFiles --progress-num=1,2,3,4,5,6 "Built target server"
+.PHONY : CMakeFiles/server.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/CloudArchiveServer.dir/rule: cmake_check_build_system
+CMakeFiles/server.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/gabr/Projects/GitHub/Cloud-archive-Project/server/build/CMakeFiles 6
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/CloudArchiveServer.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/server.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/gabr/Projects/GitHub/Cloud-archive-Project/server/build/CMakeFiles 0
-.PHONY : CMakeFiles/CloudArchiveServer.dir/rule
+.PHONY : CMakeFiles/server.dir/rule
 
 # Convenience name for target.
-CloudArchiveServer: CMakeFiles/CloudArchiveServer.dir/rule
-.PHONY : CloudArchiveServer
+server: CMakeFiles/server.dir/rule
+.PHONY : server
 
 # clean rule for target.
-CMakeFiles/CloudArchiveServer.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CloudArchiveServer.dir/build.make CMakeFiles/CloudArchiveServer.dir/clean
-.PHONY : CMakeFiles/CloudArchiveServer.dir/clean
+CMakeFiles/server.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/clean
+.PHONY : CMakeFiles/server.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

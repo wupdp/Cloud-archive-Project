@@ -8,8 +8,8 @@ int create_socket(int port)
     //Create a socket for the client
     //If sockfd<0 there was an error in the creation of the socket
     if ((sockfd = socket (AF_INET, SOCK_STREAM, 0)) <0) {
-        cerr<<"Problem in creating the socket"<<endl;
-        exit(2);
+        std::cerr<<"Problem in creating the socket"<<std::endl;
+        return -1; // return error code
     }
 
     //Creation of the socket
@@ -20,14 +20,14 @@ int create_socket(int port)
 
     //Bind the socket
     if (bind(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr))<0) {
-        cerr<<"Problem in binding the socket"<<endl;
-        exit(3);
+        std::cerr<<"Problem in binding the socket"<<std::endl;
+        return -2; // return error code
     }
 
     //Listen on the socket
     if (listen(sockfd, 1)<0) {
-        cerr<<"Problem in listening on the socket"<<endl;
-        exit(4);
+        std::cerr<<"Problem in listening on the socket"<<std::endl;
+        return -3; // return error code
     }
 
     return sockfd;

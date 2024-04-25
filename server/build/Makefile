@@ -117,24 +117,24 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named CloudArchiveServer
+# Target rules for targets named server
 
 # Build rule for target.
-CloudArchiveServer: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CloudArchiveServer
-.PHONY : CloudArchiveServer
+server: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 server
+.PHONY : server
 
 # fast build rule for target.
-CloudArchiveServer/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CloudArchiveServer.dir/build.make CMakeFiles/CloudArchiveServer.dir/build
-.PHONY : CloudArchiveServer/fast
+server/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/build
+.PHONY : server/fast
 
 src/ftp_commands.o: src/ftp_commands.cpp.o
 .PHONY : src/ftp_commands.o
 
 # target to build an object file
 src/ftp_commands.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CloudArchiveServer.dir/build.make CMakeFiles/CloudArchiveServer.dir/src/ftp_commands.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/ftp_commands.cpp.o
 .PHONY : src/ftp_commands.cpp.o
 
 src/ftp_commands.i: src/ftp_commands.cpp.i
@@ -142,7 +142,7 @@ src/ftp_commands.i: src/ftp_commands.cpp.i
 
 # target to preprocess a source file
 src/ftp_commands.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CloudArchiveServer.dir/build.make CMakeFiles/CloudArchiveServer.dir/src/ftp_commands.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/ftp_commands.cpp.i
 .PHONY : src/ftp_commands.cpp.i
 
 src/ftp_commands.s: src/ftp_commands.cpp.s
@@ -150,7 +150,7 @@ src/ftp_commands.s: src/ftp_commands.cpp.s
 
 # target to generate assembly for a file
 src/ftp_commands.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CloudArchiveServer.dir/build.make CMakeFiles/CloudArchiveServer.dir/src/ftp_commands.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/ftp_commands.cpp.s
 .PHONY : src/ftp_commands.cpp.s
 
 src/main.o: src/main.cpp.o
@@ -158,7 +158,7 @@ src/main.o: src/main.cpp.o
 
 # target to build an object file
 src/main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CloudArchiveServer.dir/build.make CMakeFiles/CloudArchiveServer.dir/src/main.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/main.cpp.o
 .PHONY : src/main.cpp.o
 
 src/main.i: src/main.cpp.i
@@ -166,7 +166,7 @@ src/main.i: src/main.cpp.i
 
 # target to preprocess a source file
 src/main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CloudArchiveServer.dir/build.make CMakeFiles/CloudArchiveServer.dir/src/main.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/main.cpp.i
 .PHONY : src/main.cpp.i
 
 src/main.s: src/main.cpp.s
@@ -174,7 +174,7 @@ src/main.s: src/main.cpp.s
 
 # target to generate assembly for a file
 src/main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CloudArchiveServer.dir/build.make CMakeFiles/CloudArchiveServer.dir/src/main.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
 src/server.o: src/server.cpp.o
@@ -182,7 +182,7 @@ src/server.o: src/server.cpp.o
 
 # target to build an object file
 src/server.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CloudArchiveServer.dir/build.make CMakeFiles/CloudArchiveServer.dir/src/server.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/server.cpp.o
 .PHONY : src/server.cpp.o
 
 src/server.i: src/server.cpp.i
@@ -190,7 +190,7 @@ src/server.i: src/server.cpp.i
 
 # target to preprocess a source file
 src/server.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CloudArchiveServer.dir/build.make CMakeFiles/CloudArchiveServer.dir/src/server.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/server.cpp.i
 .PHONY : src/server.cpp.i
 
 src/server.s: src/server.cpp.s
@@ -198,7 +198,7 @@ src/server.s: src/server.cpp.s
 
 # target to generate assembly for a file
 src/server.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CloudArchiveServer.dir/build.make CMakeFiles/CloudArchiveServer.dir/src/server.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/server.cpp.s
 .PHONY : src/server.cpp.s
 
 src/socket.o: src/socket.cpp.o
@@ -206,7 +206,7 @@ src/socket.o: src/socket.cpp.o
 
 # target to build an object file
 src/socket.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CloudArchiveServer.dir/build.make CMakeFiles/CloudArchiveServer.dir/src/socket.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/socket.cpp.o
 .PHONY : src/socket.cpp.o
 
 src/socket.i: src/socket.cpp.i
@@ -214,7 +214,7 @@ src/socket.i: src/socket.cpp.i
 
 # target to preprocess a source file
 src/socket.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CloudArchiveServer.dir/build.make CMakeFiles/CloudArchiveServer.dir/src/socket.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/socket.cpp.i
 .PHONY : src/socket.cpp.i
 
 src/socket.s: src/socket.cpp.s
@@ -222,7 +222,7 @@ src/socket.s: src/socket.cpp.s
 
 # target to generate assembly for a file
 src/socket.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CloudArchiveServer.dir/build.make CMakeFiles/CloudArchiveServer.dir/src/socket.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/socket.cpp.s
 .PHONY : src/socket.cpp.s
 
 src/utilities.o: src/utilities.cpp.o
@@ -230,7 +230,7 @@ src/utilities.o: src/utilities.cpp.o
 
 # target to build an object file
 src/utilities.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CloudArchiveServer.dir/build.make CMakeFiles/CloudArchiveServer.dir/src/utilities.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/utilities.cpp.o
 .PHONY : src/utilities.cpp.o
 
 src/utilities.i: src/utilities.cpp.i
@@ -238,7 +238,7 @@ src/utilities.i: src/utilities.cpp.i
 
 # target to preprocess a source file
 src/utilities.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CloudArchiveServer.dir/build.make CMakeFiles/CloudArchiveServer.dir/src/utilities.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/utilities.cpp.i
 .PHONY : src/utilities.cpp.i
 
 src/utilities.s: src/utilities.cpp.s
@@ -246,7 +246,7 @@ src/utilities.s: src/utilities.cpp.s
 
 # target to generate assembly for a file
 src/utilities.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/CloudArchiveServer.dir/build.make CMakeFiles/CloudArchiveServer.dir/src/utilities.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/utilities.cpp.s
 .PHONY : src/utilities.cpp.s
 
 # Help Target
@@ -257,7 +257,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... CloudArchiveServer"
+	@echo "... server"
 	@echo "... src/ftp_commands.o"
 	@echo "... src/ftp_commands.i"
 	@echo "... src/ftp_commands.s"

@@ -11,7 +11,9 @@
 #include <sys/socket.h>
 #include <iostream>
 
-void handle_ls_command(int connfd, int data_port);
+extern std::string root_directory;
+
+void handle_ls_command(int connfd);
 void handle_pwd_command(int connfd);
 void handle_cd_command(int connfd, const char* directory);
 void handle_put_command(int connfd, int data_port, const char* filename);

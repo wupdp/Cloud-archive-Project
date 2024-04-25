@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = 
+CXX_INCLUDES = -I/home/gabr/Projects/GitHub/Cloud-archive-Project/server/include
 
-CXX_FLAGS = -std=gnu++17
+CXX_FLAGS = -std=gnu++14
 

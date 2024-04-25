@@ -1,5 +1,7 @@
 #include "../include/server.h"
 
+std::string root_directory;
+
 void run_server(int argc, char **argv) {
 
     int listenfd, connfd, n;
@@ -17,6 +19,8 @@ void run_server(int argc, char **argv) {
         std::cerr<<"Problem in creating the socket"<<std::endl;
         exit(2);
     }
+
+    root_directory = argv[2];
 
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -49,7 +53,7 @@ void run_server(int argc, char **argv) {
             while ( (n = recv(connfd, buf, MAXLINE,0)) > 0)  {
                 std::cout<<"String received from client: "<<buf;
                 if (strncmp("ls", buf, 2) == 0) {
-                    handle_ls_command(connfd, data_port);
+                    handle_ls_command(connfd);
                 } else if (strncmp("pwd", buf, 3) == 0) {
                     handle_pwd_command(connfd);
                 } else if (strncmp("cd", buf, 2) == 0) {
@@ -70,4 +74,5 @@ void run_server(int argc, char **argv) {
         }
         close(connfd);
     }
+    close(listenfd);
 }

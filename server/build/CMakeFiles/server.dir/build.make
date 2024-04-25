@@ -83,17 +83,81 @@ CMakeFiles/server.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/server.dir/src/main.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/gabr/Projects/GitHub/Cloud-archive-Project/server/src/main.cpp -o CMakeFiles/server.dir/src/main.cpp.s
 
+CMakeFiles/server.dir/src/server.cpp.o: CMakeFiles/server.dir/flags.make
+CMakeFiles/server.dir/src/server.cpp.o: /home/gabr/Projects/GitHub/Cloud-archive-Project/server/src/server.cpp
+CMakeFiles/server.dir/src/server.cpp.o: CMakeFiles/server.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/gabr/Projects/GitHub/Cloud-archive-Project/server/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/server.dir/src/server.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/server.dir/src/server.cpp.o -MF CMakeFiles/server.dir/src/server.cpp.o.d -o CMakeFiles/server.dir/src/server.cpp.o -c /home/gabr/Projects/GitHub/Cloud-archive-Project/server/src/server.cpp
+
+CMakeFiles/server.dir/src/server.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/server.dir/src/server.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/gabr/Projects/GitHub/Cloud-archive-Project/server/src/server.cpp > CMakeFiles/server.dir/src/server.cpp.i
+
+CMakeFiles/server.dir/src/server.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/server.dir/src/server.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/gabr/Projects/GitHub/Cloud-archive-Project/server/src/server.cpp -o CMakeFiles/server.dir/src/server.cpp.s
+
+CMakeFiles/server.dir/src/socket.cpp.o: CMakeFiles/server.dir/flags.make
+CMakeFiles/server.dir/src/socket.cpp.o: /home/gabr/Projects/GitHub/Cloud-archive-Project/server/src/socket.cpp
+CMakeFiles/server.dir/src/socket.cpp.o: CMakeFiles/server.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/gabr/Projects/GitHub/Cloud-archive-Project/server/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/server.dir/src/socket.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/server.dir/src/socket.cpp.o -MF CMakeFiles/server.dir/src/socket.cpp.o.d -o CMakeFiles/server.dir/src/socket.cpp.o -c /home/gabr/Projects/GitHub/Cloud-archive-Project/server/src/socket.cpp
+
+CMakeFiles/server.dir/src/socket.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/server.dir/src/socket.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/gabr/Projects/GitHub/Cloud-archive-Project/server/src/socket.cpp > CMakeFiles/server.dir/src/socket.cpp.i
+
+CMakeFiles/server.dir/src/socket.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/server.dir/src/socket.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/gabr/Projects/GitHub/Cloud-archive-Project/server/src/socket.cpp -o CMakeFiles/server.dir/src/socket.cpp.s
+
+CMakeFiles/server.dir/src/ftp_commands.cpp.o: CMakeFiles/server.dir/flags.make
+CMakeFiles/server.dir/src/ftp_commands.cpp.o: /home/gabr/Projects/GitHub/Cloud-archive-Project/server/src/ftp_commands.cpp
+CMakeFiles/server.dir/src/ftp_commands.cpp.o: CMakeFiles/server.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/gabr/Projects/GitHub/Cloud-archive-Project/server/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/server.dir/src/ftp_commands.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/server.dir/src/ftp_commands.cpp.o -MF CMakeFiles/server.dir/src/ftp_commands.cpp.o.d -o CMakeFiles/server.dir/src/ftp_commands.cpp.o -c /home/gabr/Projects/GitHub/Cloud-archive-Project/server/src/ftp_commands.cpp
+
+CMakeFiles/server.dir/src/ftp_commands.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/server.dir/src/ftp_commands.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/gabr/Projects/GitHub/Cloud-archive-Project/server/src/ftp_commands.cpp > CMakeFiles/server.dir/src/ftp_commands.cpp.i
+
+CMakeFiles/server.dir/src/ftp_commands.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/server.dir/src/ftp_commands.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/gabr/Projects/GitHub/Cloud-archive-Project/server/src/ftp_commands.cpp -o CMakeFiles/server.dir/src/ftp_commands.cpp.s
+
+CMakeFiles/server.dir/src/utilities.cpp.o: CMakeFiles/server.dir/flags.make
+CMakeFiles/server.dir/src/utilities.cpp.o: /home/gabr/Projects/GitHub/Cloud-archive-Project/server/src/utilities.cpp
+CMakeFiles/server.dir/src/utilities.cpp.o: CMakeFiles/server.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/gabr/Projects/GitHub/Cloud-archive-Project/server/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/server.dir/src/utilities.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/server.dir/src/utilities.cpp.o -MF CMakeFiles/server.dir/src/utilities.cpp.o.d -o CMakeFiles/server.dir/src/utilities.cpp.o -c /home/gabr/Projects/GitHub/Cloud-archive-Project/server/src/utilities.cpp
+
+CMakeFiles/server.dir/src/utilities.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/server.dir/src/utilities.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/gabr/Projects/GitHub/Cloud-archive-Project/server/src/utilities.cpp > CMakeFiles/server.dir/src/utilities.cpp.i
+
+CMakeFiles/server.dir/src/utilities.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/server.dir/src/utilities.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/gabr/Projects/GitHub/Cloud-archive-Project/server/src/utilities.cpp -o CMakeFiles/server.dir/src/utilities.cpp.s
+
 # Object files for target server
 server_OBJECTS = \
-"CMakeFiles/server.dir/src/main.cpp.o"
+"CMakeFiles/server.dir/src/main.cpp.o" \
+"CMakeFiles/server.dir/src/server.cpp.o" \
+"CMakeFiles/server.dir/src/socket.cpp.o" \
+"CMakeFiles/server.dir/src/ftp_commands.cpp.o" \
+"CMakeFiles/server.dir/src/utilities.cpp.o"
 
 # External object files for target server
 server_EXTERNAL_OBJECTS =
 
 server: CMakeFiles/server.dir/src/main.cpp.o
+server: CMakeFiles/server.dir/src/server.cpp.o
+server: CMakeFiles/server.dir/src/socket.cpp.o
+server: CMakeFiles/server.dir/src/ftp_commands.cpp.o
+server: CMakeFiles/server.dir/src/utilities.cpp.o
 server: CMakeFiles/server.dir/build.make
 server: CMakeFiles/server.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/gabr/Projects/GitHub/Cloud-archive-Project/server/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable server"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/gabr/Projects/GitHub/Cloud-archive-Project/server/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable server"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/server.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
