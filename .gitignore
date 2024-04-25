@@ -46,6 +46,6 @@ libs/
 *.cache
 *.VC.db
 *.VC.VC.opendb
-*.client/cmake-build-debug/
-*.server/cmake-build-debug/
-*.server/build/
+/client/cmake-build-debug/
+/server/cmake-build-debug/
+/server/build/
