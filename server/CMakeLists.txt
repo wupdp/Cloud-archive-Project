@@ -1,10 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
-project(server)
+project(CloudArchiveServer)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 
-add_executable(server src/server.cpp src/command_handler.cpp src/file_handler.cpp src/error_handler.cpp src/socket_utils.cpp)
+add_executable(CloudArchiveServer src/main.cpp src/server.cpp src/socket.cpp src/ftp_commands.cpp src/utilities.cpp)
 
-# Поиск библиотеки для сокетов
-find_package(Threads REQUIRED)
-target_link_libraries(server PRIVATE Threads::Threads)
+target_include_directories(CloudArchiveServer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
