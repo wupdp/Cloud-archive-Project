@@ -90,12 +90,13 @@ void handle_cd_command(int connfd, const char* directory) {
         new_dir = root_directory + "/" + directory;
     }
 
-    // Проверяем, что новый путь находится внутри root_directory
-    if (new_dir.length() < root_directory.length()) {
-        std::cerr << "Cannot change directory beyond root directory" << std::endl;
-        send(connfd, "0", MAXLINE, 0);
-        return;
-    }
+//    // Проверяем, что новый путь находится внутри root_directory
+//    if (new_dir.length() < root_directory.length()) {
+//        std::cerr << "Cannot change directory beyond root directory" << std::endl;
+//        send(connfd, "0", MAXLINE, 0);
+//        return;
+//    }
+
 
     if(chdir(new_dir.c_str())<0){
         send(connfd,"0",MAXLINE,0);
