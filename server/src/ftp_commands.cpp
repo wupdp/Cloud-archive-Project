@@ -1,84 +1,35 @@
 #include "../include/ftp_commands.h"
 
-void handle_ls_command(int connfd) {
+// Create a new SSL_CTX object
+SSL_CTX *ctx = SSL_CTX_new(TLS_server_method());
+
+void handle_ls_command(SSL* ssl) {
     // Реализация команды ls
     std::string curr_dir = get_current_dir();
     chdir(root_directory.c_str());
 
     FILE *in;
     char temp[MAXLINE];
-    int datasock;
-    struct sockaddr_in data_addr;
-    socklen_t data_len = sizeof(data_addr);
-
-    // Создаем сокет для передачи данных
-    datasock = socket(AF_INET, SOCK_STREAM, 0);
-    if (datasock < 0) {
-        std::cerr << "Problem in creating the data socket" << std::endl;
-        return;
-    }
-
-    // Привязываем сокет к любому свободному порту
-    memset(&data_addr, 0, sizeof(data_addr));
-    data_addr.sin_family = AF_INET;
-    data_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    data_addr.sin_port = 0;
-    if (bind(datasock, (struct sockaddr *) &data_addr, sizeof(data_addr)) < 0) {
-        std::cerr << "Problem in binding the data socket" << std::endl;
-        close(datasock);
-        return;
-    }
-
-    // Получаем номер выбранного порта
-    if (getsockname(datasock, (struct sockaddr *) &data_addr, &data_len) < 0) {
-        std::cerr << "Problem in getting the data socket name" << std::endl;
-        close(datasock);
-        return;
-    }
-    int data_port = ntohs(data_addr.sin_port);
-
-    // Отправляем номер порта клиенту
-    char port[MAXLINE];
-    sprintf(port, "%d", data_port);
-    send(connfd, port, MAXLINE, 0);
-
-    // Принимаем соединение от клиента
-    if (listen(datasock, 1) < 0) {
-        std::cerr << "Problem in listening on the data socket" << std::endl;
-        close(datasock);
-        return;
-    }
-    int dataconnfd = accept(datasock, NULL, NULL);
-    if (dataconnfd < 0) {
-        std::cerr << "Problem in accepting the data socket" << std::endl;
-        close(datasock);
-        return;
-    }
 
     // Отправляем список файлов клиенту
     if (!(in = popen("ls", "r"))) {
         std::cout << "error" << std::endl;
     }
     while (fgets(temp, sizeof(temp), in) != NULL) {
-        send(dataconnfd, "1", MAXLINE, 0);
-        send(dataconnfd, temp, MAXLINE, 0);
+        SSL_write(ssl, temp, strlen(temp));
     }
-    send(dataconnfd, "0", MAXLINE, 0);
     pclose(in);
 
-    // Закрываем сокеты
-    close(dataconnfd);
-    close(datasock);
     chdir(curr_dir.c_str());
 }
 
-void handle_pwd_command(int connfd) {
+void handle_pwd_command(SSL* ssl) {
     // Реализация команды pwd
     std::string curr_dir = get_current_dir();
-    send(connfd, curr_dir.c_str(), MAXLINE, 0);
+    SSL_write(ssl, curr_dir.c_str(), curr_dir.length());
 }
 
-void handle_cd_command(int connfd, const char* directory) {
+void handle_cd_command(SSL* ssl, const char* directory) {
     // Реализация команды cd
     std::string new_dir;
     if (strcmp(directory, "..") == 0) {
@@ -90,95 +41,121 @@ void handle_cd_command(int connfd, const char* directory) {
         new_dir = root_directory + "/" + directory;
     }
 
-//    // Проверяем, что новый путь находится внутри root_directory
-//    if (new_dir.length() < root_directory.length()) {
-//        std::cerr << "Cannot change directory beyond root directory" << std::endl;
-//        send(connfd, "0", MAXLINE, 0);
-//        return;
-//    }
-
-
     if(chdir(new_dir.c_str())<0){
-        send(connfd,"0",MAXLINE,0);
+        SSL_write(ssl, "0", MAXLINE);
     }
     else{
         root_directory = new_dir;
-        send(connfd,"1",MAXLINE,0);
+        SSL_write(ssl, "1", MAXLINE);
     }
 }
 
-void handle_put_command(int connfd, int data_port, const char* filename) {
+void handle_put_command(SSL* ssl, int data_port, const char* filename) {
     // Реализация команды put
     if(access(filename,F_OK)!=-1){
         char port[MAXLINE], buffer[MAXLINE],char_num_blks[MAXLINE],char_num_last_blk[MAXLINE];
-        int datasock,num_blks,num_last_blk,i;
+        int num_blks,num_last_blk,i;
         FILE *fp;
         data_port=data_port+1;
         sprintf(port,"%d",data_port);
-        datasock=create_socket(data_port);				//creating socket for data connection
-        send(connfd, port,MAXLINE,0);					//sending data connection port to client
-        datasock=accept_conn(datasock);					//accepting connection
+        int datasock = create_socket(data_port); // создание сокета для передачи данных
+        SSL_write(ssl, port,MAXLINE); // отправка порта соединения с данными клиенту
+        datasock = accept_conn(datasock); // принятие соединения
+
+        // Создание новой SSL структуры для соединения
+        SSL *ssl_datasock = SSL_new(ctx);
+        // Ассоциирование сокета с SSL структурой
+        SSL_set_fd(ssl_datasock, datasock);
+        // Выполнение SSL рукопожатия
+        if (SSL_accept(ssl_datasock) <= 0) {
+            // Обработка неудачного рукопожатия
+            std::cerr << "SSL handshake failed" << std::endl;
+            return;
+        }
+
         if ((fp=fopen(filename,"r"))!=NULL)
         {
-            //size of file
+            // размер файла
             fseek (fp , 0 , SEEK_END);
             long lSize = ftell (fp);
             rewind (fp);
             num_blks = lSize/MAXLINE;
             num_last_blk = lSize%MAXLINE;
             sprintf(char_num_blks,"%d",num_blks);
-            send(connfd, char_num_blks, MAXLINE, 0);
+            SSL_write(ssl, char_num_blks, MAXLINE);
 
             for(i= 0; i < num_blks; i++) {
                 fread (buffer,sizeof(char),MAXLINE,fp);
-                send(datasock, buffer, MAXLINE, 0);
+                SSL_write(ssl_datasock, buffer, MAXLINE);
             }
             sprintf(char_num_last_blk,"%d",num_last_blk);
-            send(connfd, char_num_last_blk, MAXLINE, 0);
+            SSL_write(ssl, char_num_last_blk, MAXLINE);
             if (num_last_blk > 0) {
                 fread (buffer,sizeof(char),num_last_blk,fp);
-                send(datasock, buffer, MAXLINE, 0);
+                SSL_write(ssl_datasock, buffer, MAXLINE);
             }
             fclose(fp);
         }
         else{
-            send(connfd,"0",MAXLINE,0);
+            SSL_write(ssl,"0",MAXLINE);
         }
+
+        // Закрытие SSL соединения и освобождение ресурсов
+        SSL_shutdown(ssl_datasock);
+        SSL_free(ssl_datasock);
+        close(datasock);
     } else {
         std::cerr<<"File " << filename << " does not exist"<<std::endl;
     }
 }
 
-void handle_get_command(int connfd, int data_port, const char* filename) {
+void handle_get_command(SSL* ssl, int data_port, const char* filename) {
     // Реализация команды get
-    if(access(filename,F_OK)==-1){
+    if(access(filename,F_OK)!=-1){
         char port[MAXLINE],buffer[MAXLINE],char_num_blks[MAXLINE],char_num_last_blk[MAXLINE];
         int datasock,lSize,num_blks,num_last_blk,i;
         FILE *fp;
         data_port=data_port+1;
         sprintf(port,"%d",data_port);
         datasock=create_socket(data_port);				//creating socket for data connection
-        send(connfd, port,MAXLINE,0);					//sending port no. to client
+        SSL_write(ssl, port,MAXLINE);					//sending port no. to client
         datasock=accept_conn(datasock);					//accepting connnection by client
+
+        // Создание новой SSL структуры для соединения
+        SSL *ssl_datasock = SSL_new(ctx);
+        // Ассоциирование сокета с SSL структурой
+        SSL_set_fd(ssl_datasock, datasock);
+        // Выполнение SSL рукопожатия
+        if (SSL_accept(ssl_datasock) <= 0) {
+            // Обработка неудачного рукопожатия
+            std::cerr << "SSL handshake failed" << std::endl;
+            return;
+        }
+
         if ((fp=fopen(filename,"w"))!=NULL)
         {
-            recv(connfd, char_num_blks, MAXLINE,0);
+            SSL_read(ssl, char_num_blks, MAXLINE);
             num_blks=atoi(char_num_blks);
             for(i= 0; i < num_blks; i++) {
-                recv(datasock, buffer, MAXLINE,0);
+                SSL_read(ssl_datasock, buffer, MAXLINE); // Используем datasocket для чтения данных
                 fwrite(buffer,sizeof(char),MAXLINE,fp);
             }
-            recv(connfd, char_num_last_blk, MAXLINE,0);
+            SSL_read(ssl, char_num_last_blk, MAXLINE);
             num_last_blk=atoi(char_num_last_blk);
             if (num_last_blk > 0) {
-                recv(datasock, buffer, MAXLINE,0);
+                SSL_read(ssl_datasock, buffer, MAXLINE); // Используем datasocket для чтения данных
                 fwrite(buffer,sizeof(char),num_last_blk,fp);
             }
             fclose(fp);
         }
         else{
-            send(connfd,"0",MAXLINE,0);
+            SSL_write(ssl,"0",MAXLINE);
         }
+
+        // Закрытие SSL соединения и освобождение ресурсов
+        SSL_shutdown(ssl_datasock);
+        SSL_free(ssl_datasock);
+        close(datasock);
     } else {
         std::cerr<<"File " << filename << " does not exists"<<std::endl;
     }

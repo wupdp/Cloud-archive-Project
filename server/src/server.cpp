@@ -7,21 +7,21 @@ void handle_ftp_command(SSL *ssl, int connfd, int data_port) {
     SSL_read(ssl, command, sizeof(command));
 
     if (strncmp(command, "ls", 2) == 0) {
-        handle_ls_command(connfd);
+        handle_ls_command(ssl);
     } else if (strncmp(command, "pwd", 3) == 0) {
-        handle_pwd_command(connfd);
+        handle_pwd_command(ssl);
     } else if (strncmp(command, "cd", 2) == 0) {
         char directory[MAXLINE];
         SSL_read(ssl, directory, sizeof(directory));
-        handle_cd_command(connfd, directory);
+        handle_cd_command(ssl, directory);
     } else if (strncmp(command, "put", 3) == 0) {
         char filename[MAXLINE];
         SSL_read(ssl, filename, sizeof(filename));
-        handle_put_command(connfd, data_port, filename);
+        handle_put_command(ssl, data_port, filename);
     } else if (strncmp(command, "get", 3) == 0) {
         char filename[MAXLINE];
         SSL_read(ssl, filename, sizeof(filename));
-        handle_get_command(connfd, data_port, filename);
+        handle_get_command(ssl, data_port, filename);
     } else {
         std::cerr << "Unknown command: " << command << std::endl;
     }
