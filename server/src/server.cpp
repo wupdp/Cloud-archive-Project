@@ -70,6 +70,11 @@ void run_server(int argc, char **argv) {
 
     root_directory = argv[2];
 
+    if(chdir(root_directory.c_str())<0){
+        std::cerr << "Problem in changing the root directory" << std::endl;
+        return;
+    }
+
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
