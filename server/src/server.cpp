@@ -1,5 +1,5 @@
 #include "../include/server.h"
-
+std::string root_directory;
 void handle_ftp_command(SSL *ssl, int connfd, int data_port) {
     char command[MAXLINE];
     SSL_read(ssl, command, sizeof(command));
@@ -62,6 +62,8 @@ void run_server_ssl(int argc, char **argv) {
         std::cerr << "Problem in creating the socket" << std::endl;
         exit(5);
     }
+
+    root_directory = argv[2];
 
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
