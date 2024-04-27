@@ -1,5 +1,7 @@
 #include "../include/server.h"
+
 std::string root_directory;
+
 void handle_ftp_command(SSL *ssl, int connfd, int data_port) {
     char command[MAXLINE];
     SSL_read(ssl, command, sizeof(command));
@@ -25,7 +27,7 @@ void handle_ftp_command(SSL *ssl, int connfd, int data_port) {
     }
 }
 
-void run_server_ssl(int argc, char **argv) {
+void run_server(int argc, char **argv) {
     int data_port = 1024;
     int listenfd, connfd;
     pid_t childpid;
@@ -34,7 +36,7 @@ void run_server_ssl(int argc, char **argv) {
 
     if (argc != 3) {
         std::cerr << "Usage: ./server_ssl <port number> <root directory>" << std::endl;
-        exit(1);
+        return;
     }
 
     SSL_CTX *ctx;
@@ -44,23 +46,23 @@ void run_server_ssl(int argc, char **argv) {
     ctx = SSL_CTX_new(SSLv23_server_method());
     if (!ctx) {
         std::cerr << "SSL context creation failed." << std::endl;
-        exit(2);
+        return;
     }
 
     // Загрузка сертификата и закрытого ключа
     if (SSL_CTX_use_certificate_file(ctx, "../server.crt", SSL_FILETYPE_PEM) <= 0) {
         std::cerr << "Error loading server certificate." << std::endl;
-        exit(3);
+        return;
     }
     if (SSL_CTX_use_PrivateKey_file(ctx, "../server.key", SSL_FILETYPE_PEM) <= 0) {
         std::cerr << "Error loading server private key." << std::endl;
-        exit(4);
+        return;
     }
 
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
     if (listenfd < 0) {
         std::cerr << "Problem in creating the socket" << std::endl;
-        exit(5);
+        return;
     }
 
     root_directory = argv[2];
@@ -70,13 +72,23 @@ void run_server_ssl(int argc, char **argv) {
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
     servaddr.sin_port = htons(atoi(argv[1]));
 
-    bind(listenfd, (struct sockaddr *) &servaddr, sizeof(servaddr));
+    if (bind(listenfd, (struct sockaddr *) &servaddr, sizeof(servaddr)) < 0) {
+        std::cerr << "Problem in binding the socket" << std::endl;
+        return;
+    }
 
-    listen(listenfd, LISTENQ);
+    if (listen(listenfd, LISTENQ) < 0) {
+        std::cerr << "Problem in listening on the socket" << std::endl;
+        return;
+    }
 
     for (;;) {
         clilen = sizeof(cliaddr);
         connfd = accept(listenfd, (struct sockaddr *) &cliaddr, &clilen);
+        if (connfd < 0) {
+            std::cerr << "Problem in accepting the socket" << std::endl;
+            return;
+        }
 
         if ((childpid = fork()) == 0) {
             close(listenfd);
@@ -86,7 +98,8 @@ void run_server_ssl(int argc, char **argv) {
 
             if (SSL_accept(ssl) <= 0) {
                 std::cerr << "SSL handshake error." << std::endl;
-                exit(6);
+                SSL_free(ssl);
+                return;
             }
 
             if (authenticateUserSSL(ssl)) {
@@ -104,7 +117,8 @@ void run_server_ssl(int argc, char **argv) {
             }
 
             close(connfd);
-            exit(0);
+            SSL_free(ssl);
+            return;
         }
 
         close(connfd);
