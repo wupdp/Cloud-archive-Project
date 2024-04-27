@@ -1,236 +1,138 @@
-#include <iostream>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <fstream>
-#include <string.h>
-#include <arpa/inet.h>
+#include "client.h"
+
 using namespace std;
 
-int create_socket(int,char *);
+SSL_CTX* init_ssl_context() {
+    SSL_library_init();
+    SSL_CTX* ctx = SSL_CTX_new(SSLv23_client_method());
+    if (!ctx) {
+        cerr << "SSL context creation failed." << endl;
+        exit(EXIT_FAILURE);
+    }
+    return ctx;
+}
 
-#ifdef WINDOWS
-#include <direct.h>
-    #define GetCurrentDir _getcwd
-#else
-#include <unistd.h>
-#define GetCurrentDir getcwd
-#endif
+void handle_error(const string& msg) {
+    cerr << msg << endl;
+    ERR_print_errors_fp(stderr);
+    exit(EXIT_FAILURE);
+}
 
-#define MAXLINE 4096 /*max text line length*/
-
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
     int sockfd;
     struct sockaddr_in servaddr;
-    char sendline[MAXLINE], recvline[MAXLINE];
+    char sendline[BUFFER_SIZE], recvline[BUFFER_SIZE];
+    char buffer[BUFFER_SIZE];
 
-    //basic check of the arguments
-    //additional checks can be inserted
-    if (argc !=3) {
-        cerr<<"Usage: ./a.out <IP address of the server> <port number>"<<endl;
+    // Check of the arguments
+    if (argc < 3) {
+        cerr << "Usage: ./ftclient <IP address of the server> <port number>" << endl;
         exit(1);
     }
 
-    //Create a socket for the client
-    //If sockfd<0 there was an error in the creation of the socket
-    if ((sockfd = socket (AF_INET, SOCK_STREAM, 0)) <0) {
-        cerr<<"Problem in creating the socket"<<endl;
+    int server_port = atoi(argv[2]);
+
+    // Check port number
+    if (server_port < 1) {
+        printf("Incorrect FTP port!\n");
         exit(2);
     }
 
-    //Creation of the socket
-    memset(&servaddr, 0, sizeof(servaddr));
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr= inet_addr(argv[1]);
-    servaddr.sin_port =  htons(atoi(argv[2])); //convert to big-endian order
-
-    //Connection of the client to the socket
-    if (connect(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr))<0) {
-        cerr<<"Problem in connecting to the server"<<endl;
+    // Check hostname (IP address)
+    char* server_ip = argv[1];
+    struct hostent *host_name;
+    host_name = gethostbyname(server_ip);
+    if (host_name == NULL) {
+        printf("Incorrect FTP hostname (IP address)!\n");
         exit(3);
     }
 
-    cout<<"ftp>";
+    // Create SSL context
+    SSL_CTX* ctx = init_ssl_context();
 
-    while (fgets(sendline, MAXLINE, stdin) != NULL) {
-
-        send(sockfd, sendline, MAXLINE, 0);
-        char *token,*dummy;
-        dummy=sendline;
-        token=strtok(dummy," ");
-
-        if (strcmp("quit\n",sendline)==0)  {
-            //close(sockfd);
-            return 0;
-        }
-
-        else if (strcmp("ls\n",sendline)==0)  {
-            char buff[MAXLINE],check[MAXLINE]="1",port[MAXLINE];
-            int data_port,datasock;
-            recv(sockfd, port, MAXLINE,0);				//reciening data connection port
-            data_port=atoi(port);
-            datasock=create_socket(data_port,argv[1]);
-            while(strcmp("1",check)==0){ 				//to indicate that more blocks are coming
-                recv(datasock,check,MAXLINE,0);
-                if(strcmp("0",check)==0)			//no more blocks of data
-                    break;
-                recv(datasock, buff, MAXLINE,0);
-                cout<<buff;
-            }
-
-        }
-
-        else if (strcmp("!ls\n",sendline)==0)  {
-            system("ls");
-            cout<<"\n";
-        }
-
-        else if (strcmp("pwd\n",sendline)==0)  {
-            char curr_dir[MAXLINE];
-            recv(sockfd, curr_dir, MAXLINE,0);
-            cout<<curr_dir<<endl;
-        }
-
-        else if (strcmp("!pwd\n",sendline)==0)  {
-            system("pwd");
-        }
-
-        else if (strcmp("cd",token)==0)  {
-            char check[MAXLINE];
-            token=strtok(NULL," \n");
-            cout<<"Path given is: "<<token<<endl;
-            recv(sockfd,check,MAXLINE,0);
-            if(strcmp("0",check)==0){
-                cerr<<"Directory doesn't exist. Check Path"<<endl;
-            }
-
-        }
-
-        else if (strcmp("!cd",token)==0)  {
-            token=strtok(NULL," \n");
-            cout<<"Path given is: "<<token<<endl;
-            if(chdir(token)<0){
-                cerr<<"Directory doesn't exist. Check path"<<endl;
-            }
-        }
-
-        else if (strcmp("put",token)==0)  {
-            char port[MAXLINE], buffer[MAXLINE],char_num_blks[MAXLINE],char_num_last_blk[MAXLINE];
-            int data_port,datasock,lSize,num_blks,num_last_blk,i;
-            FILE *fp;
-            recv(sockfd, port, MAXLINE,0);				//receiving the data port
-            data_port=atoi(port);
-            datasock=create_socket(data_port,argv[1]);
-            token=strtok(NULL," \n");
-            if ((fp=fopen(token,"r"))!=NULL)
-            {
-                //size of file
-                send(sockfd,"1",MAXLINE,0);
-                fseek (fp , 0 , SEEK_END);
-                lSize = ftell (fp);
-                rewind (fp);
-                num_blks = lSize/MAXLINE;
-                num_last_blk = lSize%MAXLINE;
-                sprintf(char_num_blks,"%d",num_blks);
-                send(sockfd, char_num_blks, MAXLINE, 0);
-                //cout<<num_blks<<"	"<<num_last_blk<<endl;
-
-                for(i= 0; i < num_blks; i++) {
-                    fread (buffer,sizeof(char),MAXLINE,fp);
-                    send(datasock, buffer, MAXLINE, 0);
-                    //cout<<buffer<<"	"<<i<<endl;
-                }
-                sprintf(char_num_last_blk,"%d",num_last_blk);
-                send(sockfd, char_num_last_blk, MAXLINE, 0);
-                if (num_last_blk > 0) {
-                    fread (buffer,sizeof(char),num_last_blk,fp);
-                    send(datasock, buffer, MAXLINE, 0);
-                    //cout<<buffer<<endl;
-                }
-                fclose(fp);
-                cout<<"File upload done.\n";
-            }
-            else{
-                send(sockfd,"0",MAXLINE,0);
-                cerr<<"Error in opening file. Check filename\nUsage: put filename"<<endl;
-            }
-        }
-
-        else if (strcmp("get",token)==0)  {
-            char port[MAXLINE], buffer[MAXLINE],char_num_blks[MAXLINE],char_num_last_blk[MAXLINE],message[MAXLINE];
-            int data_port,datasock,lSize,num_blks,num_last_blk,i;
-            FILE *fp;
-            recv(sockfd, port, MAXLINE,0);
-            data_port=atoi(port);
-            datasock=create_socket(data_port,argv[1]);
-            token=strtok(NULL," \n");
-            recv(sockfd,message,MAXLINE,0);
-            if(strcmp("1",message)==0){
-                if((fp=fopen(token,"w"))==NULL)
-                    cout<<"Error in creating file\n";
-                else
-                {
-                    recv(sockfd, char_num_blks, MAXLINE,0);
-                    num_blks=atoi(char_num_blks);
-                    for(i= 0; i < num_blks; i++) {
-                        recv(datasock, buffer, MAXLINE,0);
-                        fwrite(buffer,sizeof(char),MAXLINE,fp);
-                        //cout<<buffer<<endl;
-                    }
-                    recv(sockfd, char_num_last_blk, MAXLINE,0);
-                    num_last_blk=atoi(char_num_last_blk);
-                    if (num_last_blk > 0) {
-                        recv(datasock, buffer, MAXLINE,0);
-                        fwrite(buffer,sizeof(char),num_last_blk,fp);
-                        //cout<<buffer<<endl;
-                    }
-                    fclose(fp);
-                    cout<<"File download done."<<endl;
-                }
-            }
-            else{
-                cerr<<"Error in opening file. Check filename\nUsage: put filename"<<endl;
-            }
-        }
-        else{
-            cerr<<"Error in command. Check Command"<<endl;
-        }
-        cout<<"ftp>";
-
+    // Create a socket for the client
+    if ((sockfd = socket (AF_INET, SOCK_STREAM, 0)) < 0) {
+        cerr << "Problem in creating the socket" << endl;
+        exit(4);
     }
 
-    exit(0);
-}
-
-
-int create_socket(int port,char *addr)
-{
-    int sockfd;
-    struct sockaddr_in servaddr;
-
-
-    //Create a socket for the client
-    //If sockfd<0 there was an error in the creation of the socket
-    if ((sockfd = socket (AF_INET, SOCK_STREAM, 0)) <0) {
-        cerr<<"Problem in creating the socket"<<endl;
-        exit(2);
-    }
-
-    //Creation of the socket
+    // Creation of the socket
     memset(&servaddr, 0, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr= inet_addr(addr);
-    servaddr.sin_port =  htons(port); //convert to big-endian order
+    servaddr.sin_addr.s_addr = inet_addr(argv[1]);
+    servaddr.sin_port =  htons(server_port); // Convert to big-endian order
 
-    //Connection of the client to the socket
-    if (connect(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr))<0) {
-        cerr<<"Problem in creating data channel"<<endl;
-        exit(3);
+    // Connection of the client to the socket
+    if (connect(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr)) < 0) {
+        cerr << "Problem in connecting to the server" << endl;
+        exit(5);
     }
 
-    return(sockfd);
+    // Create SSL object
+    SSL* ssl = SSL_new(ctx);
+    if (!ssl) {
+        handle_error("SSL object creation failed");
+    }
+
+    // Associate SSL object with file descriptor of the socket
+    SSL_set_fd(ssl, sockfd);
+
+    // Perform SSL handshake
+    if (SSL_connect(ssl) <= 0) {
+        handle_error("SSL handshake error");
+    }
+
+    // New code to read server message after connection
+    char server_message[BUFFER_SIZE];
+    int bytes = SSL_read(ssl, server_message, sizeof(server_message) - 1);
+    if (bytes > 0) {
+        server_message[bytes] = 0;
+        printf("%s\n", server_message);
+    }
+
+    menu_client();
+    struct command cmd;
+    while (1) {
+        if (read_command_client(buffer, sizeof buffer, &cmd) < 0) {
+            printf("Invalid command\n");
+            continue;
+        }
+
+        SSL_write(ssl, cmd.serv_code, BUFFER_SIZE);
+
+        if (strcmp(cmd.code, "QUIT") == 0) {
+            printf("Quit command...\n");
+            break;
+        }
+        else if (strcmp(cmd.code, "LS") == 0) {
+            cout << "Executing client_show_list..." << endl;
+            client_show_list(ssl, server_ip);
+        }
+        else if (strcmp(cmd.code, "GET") == 0) {
+            cout << "Getting file..." << endl;
+            client_get_file(ssl, server_ip, cmd);
+        }
+        else if (strcmp(cmd.code, "PUT") == 0) {
+            cout << "Putting file..." << endl;
+            client_put_file(ssl, server_ip, cmd);
+        }
+        else if (strcmp(cmd.code, "CD") == 0) {
+            client_cd_action(ssl, cmd);
+        }
+        else if (strcmp(cmd.code, "PWD") == 0) {
+            client_pwd_action(ssl);
+        }
+
+    }
+
+    printf("Thank you, buy!\n");
+
+    // Clean up
+    SSL_shutdown(ssl);
+    close(sockfd);
+    SSL_free(ssl);
+    SSL_CTX_free(ctx);
+
+    return 0;
 }

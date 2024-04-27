@@ -1,0 +1,3 @@
+/home/gabr/Projects/GitHub/Cloud-archive-Project/server/build/CMakeFiles/server.dir
+/home/gabr/Projects/GitHub/Cloud-archive-Project/server/build/CMakeFiles/edit_cache.dir
+/home/gabr/Projects/GitHub/Cloud-archive-Project/server/build/CMakeFiles/rebuild_cache.dir
