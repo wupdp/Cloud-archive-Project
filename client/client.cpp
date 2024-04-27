@@ -96,8 +96,15 @@ void client_show_list(SSL* ssl, char* server_ip) {
         SSL_read(ssl, check, BUFFER_SIZE);
         if(strcmp("0", check) == 0)
             break;
-        SSL_read(ssl, buff, BUFFER_SIZE);
-        cout << buff;
+        while (1) {
+            int bytes = SSL_read(ssl, buff, BUFFER_SIZE - 1);
+            if (bytes <= 0)
+                break;
+            buff[bytes] = 0;
+            if (buff[0] == '\0') // Если получен специальный символ, прекращаем чтение
+                break;
+            cout << buff;
+        }
     }
 }
 
@@ -173,6 +180,8 @@ void client_cd_action(SSL* ssl, struct command cmd) {
     SSL_read(ssl, check, BUFFER_SIZE);
     if (strcmp("0", check) == 0) {
         cerr << "Directory doesn't exist. Check Path" << endl;
+    } else {
+        cout << "Directory changed successfully" << endl;
     }
 }
 

@@ -15,11 +15,25 @@ void handle_ls_command(SSL* ssl) {
     if (!(in = popen("ls", "r"))) {
         std::cout << "error" << std::endl;
     }
-    while (fgets(temp, sizeof(temp), in) != NULL) {
-        SSL_write(ssl, temp, strlen(temp));
-    }
-    pclose(in);
 
+    // Читаем и отправляем вывод команды ls построчно
+    while (fgets(temp, sizeof(temp), in) != NULL) {
+        int total = 0;        // how many bytes we've sent
+        int bytesleft = strlen(temp); // how many we have left to send
+        int n;
+
+        while(total < strlen(temp)) {
+            n = SSL_write(ssl, temp + total, bytesleft);
+            if (n == -1) { break; }
+            total += n;
+            bytesleft -= n;
+        }
+    }
+
+    // Отправляем специальный символ, указывающий на конец передачи данных
+    SSL_write(ssl, "\0", 1);
+
+    pclose(in);
     chdir(curr_dir.c_str());
 }
 
@@ -31,22 +45,30 @@ void handle_pwd_command(SSL* ssl) {
 
 void handle_cd_command(SSL* ssl, const char* directory) {
     // Реализация команды cd
-    std::string new_dir;
-    if (strcmp(directory, "..") == 0) {
-        size_t pos = root_directory.find_last_of("/");
-        if (pos != std::string::npos) {
-            new_dir = root_directory.substr(0, pos);
+    if(strcmp(directory, "..") == 0) {
+        if(chdir("..")<0){
+            SSL_write(ssl, "0", MAXLINE);
         }
-    } else {
-        new_dir = root_directory + "/" + directory;
+        else{
+            char cwd[1024];
+            if (getcwd(cwd, sizeof(cwd)) != NULL) {
+                root_directory = std::string(cwd);
+            }
+            SSL_write(ssl, "1", MAXLINE);
+        }
     }
-
-    if(chdir(new_dir.c_str())<0){
-        SSL_write(ssl, "0", MAXLINE);
-    }
-    else{
-        root_directory = new_dir;
-        SSL_write(ssl, "1", MAXLINE);
+    else {
+        std::string new_dir = root_directory + "/" + directory;
+        if(chdir(new_dir.c_str())<0){
+            SSL_write(ssl, "0", MAXLINE);
+        }
+        else{
+            char cwd[1024];
+            if (getcwd(cwd, sizeof(cwd)) != NULL) {
+                root_directory = std::string(cwd);
+            }
+            SSL_write(ssl, "1", MAXLINE);
+        }
     }
 }
 
