@@ -9,7 +9,9 @@ add_executable(server src/main.cpp
         src/server.cpp
         src/ftp_commands.cpp
         src/socket.cpp
-        src/utilities.cpp)
+        src/utilities.cpp
+        src/authentification.cpp
+        include/authentification.h)
 
 # Связать библиотеки OpenSSL с вашим исполняемым файлом
 target_link_libraries(server OpenSSL::SSL OpenSSL::Crypto)

@@ -87,7 +87,19 @@ void run_server_ssl(int argc, char **argv) {
                 exit(6);
             }
 
-            handle_ftp_command(ssl, connfd, data_port);
+            if (authenticateUserSSL(ssl)) {
+                handle_ftp_command(ssl, connfd, data_port);
+            } else {
+                char new_username[256];
+                char new_password[256];
+
+                SSL_read(ssl, new_username, sizeof(new_username));
+                SSL_read(ssl, new_password, sizeof(new_password));
+
+                addUser(new_username, new_password);
+
+                SSL_write(ssl, "New user added successfully", strlen("New user added successfully"));
+            }
 
             close(connfd);
             exit(0);

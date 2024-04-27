@@ -5,6 +5,7 @@
 
 #include "socket.h"
 #include "ftp_commands.h"
+#include "authentification.h"
 #include <iostream>
 #include <thread>
 #include <atomic>
