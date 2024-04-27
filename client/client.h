@@ -8,6 +8,8 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 #ifdef WINDOWS
 #include <direct.h>
@@ -29,8 +31,8 @@ void menu_client();
 void read_input(char* buffer, int size);
 int create_socket(int port,char *addr);
 int read_command_client(char* buf, int size, struct command *cstruct);
-void client_show_list(int sockfd, char* server_ip);
-void client_get_file(int sockfd, char* server_ip, struct command cmd);
-void client_put_file(int sockfd, char* server_ip, struct command cmd);
-void client_cd_action(int sockfd, struct command cmd);
-void client_pwd_action(int sockfd);
+void client_show_list(SSL* ssl, char* server_ip);
+void client_get_file(SSL* ssl, char* server_ip, struct command cmd) ;
+void client_put_file(SSL* ssl, char* server_ip, struct command cmd);
+void client_cd_action(SSL* ssl, struct command cmd);
+void client_pwd_action(SSL* ssl);

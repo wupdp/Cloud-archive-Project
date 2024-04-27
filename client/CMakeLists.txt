@@ -1,6 +1,12 @@
-cmake_minimum_required(VERSION 3.27)
-project(client)
+cmake_minimum_required(VERSION 3.0)
+project(FTPSclient)  # Замените "YourProjectName" на имя вашего проекта
 
-set(CMAKE_CXX_STANDARD 17)
+# Найти пакет OpenSSL
+find_package(OpenSSL REQUIRED)
 
-add_executable(client main.cpp)
+# Добавить исполняемый файл
+add_executable(client main.cpp
+        client.cpp)
+
+# Связать библиотеки OpenSSL с вашим исполняемым файлом
+target_link_libraries(client OpenSSL::SSL OpenSSL::Crypto)
