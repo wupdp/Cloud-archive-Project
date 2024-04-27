@@ -1,8 +1,9 @@
+#include <sys/wait.h>
 #include "../include/server.h"
 
 std::string root_directory;
 
-bool handle_ftp_command(SSL *ssl, int connfd, int data_port) {
+bool handle_ftp_command(SSL *ssl, int data_port) {
     char command[MAXLINE];
     SSL_read(ssl, command, sizeof(command));
 
@@ -35,12 +36,14 @@ void run_server(int argc, char **argv) {
     int listenfd, connfd;
     pid_t childpid;
     socklen_t clilen;
-    struct sockaddr_in cliaddr, servaddr;
+    struct sockaddr_in cliaddr{}, servaddr;
 
     if (argc != 3) {
         std::cerr << "Usage: ./server_ssl <port number> <root directory>" << std::endl;
         return;
     }
+
+    std::cout << "Starting FTPS server ..." << std::endl;
 
     SSL_CTX *ctx;
     SSL_library_init();
@@ -50,45 +53,46 @@ void run_server(int argc, char **argv) {
     if (!ctx) {
         std::cerr << "SSL context creation failed." << std::endl;
         return;
-    }
+    } else std::cout << "SSL content creation passed" << std::endl;
 
     // Загрузка сертификата и закрытого ключа
     if (SSL_CTX_use_certificate_file(ctx, "../server.crt", SSL_FILETYPE_PEM) <= 0) {
         std::cerr << "Error loading server certificate." << std::endl;
         return;
-    }
+    } else std::cout << "Loading server certificate passed" << std::endl;
+
     if (SSL_CTX_use_PrivateKey_file(ctx, "../server.key", SSL_FILETYPE_PEM) <= 0) {
         std::cerr << "Error loading server private key." << std::endl;
         return;
-    }
+    } else std::cout << "Loading server private key passed" << std::endl;
 
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
     if (listenfd < 0) {
         std::cerr << "Problem in creating the socket" << std::endl;
         return;
-    }
+    } else std::cout << "Socket creating passed" << std::endl;
 
     root_directory = argv[2];
 
     if(chdir(root_directory.c_str())<0){
         std::cerr << "Problem in changing the root directory" << std::endl;
         return;
-    }
+    } else std::cout << "Root directory changed to" << root_directory << std::endl;
 
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    servaddr.sin_port = htons(atoi(argv[1]));
+    servaddr.sin_port = htons(stoi(argv[1]));
 
     if (bind(listenfd, (struct sockaddr *) &servaddr, sizeof(servaddr)) < 0) {
         std::cerr << "Problem in binding the socket" << std::endl;
         return;
-    }
+    } else std::cout << "Bind socket passed" << std::endl;
 
     if (listen(listenfd, LISTENQ) < 0) {
         std::cerr << "Problem in listening on the socket" << std::endl;
         return;
-    }
+    } else std::cout << "Listening socket start. LOOP:" << std::endl;
 
     for (;;) {
         clilen = sizeof(cliaddr);
@@ -96,7 +100,7 @@ void run_server(int argc, char **argv) {
         if (connfd < 0) {
             std::cerr << "Problem in accepting the socket" << std::endl;
             return;
-        }
+        } else std::cout << "Socket accepted" << std::endl << "Fork new process..." << std::endl;
 
         if ((childpid = fork()) == 0) {
             close(listenfd);
@@ -113,7 +117,7 @@ void run_server(int argc, char **argv) {
             SSL_write(ssl, "Handshake!", sizeof ("Handshake!"));
 
             //if (authenticateUserSSL(ssl)) {
-               while(handle_ftp_command(ssl, connfd, data_port));
+               while(handle_ftp_command(ssl, data_port));
             /*} else {
                 char new_username[256];
                 char new_password[256];
@@ -129,8 +133,11 @@ void run_server(int argc, char **argv) {
             close(connfd);
             SSL_free(ssl);
             return;
-        }
+        } else std::cout << "PID:" << childpid << std::endl;
 
+        while (waitpid(-1, NULL, WNOHANG) > 0) {
+            std::cout << "Collected zombie process" << std::endl;
+        }
         close(connfd);
     }
 
