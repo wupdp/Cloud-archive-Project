@@ -29,7 +29,6 @@ struct command {
 
 void menu_client();
 void read_input(char* buffer, int size);
-int create_socket(int port,char *addr);
 int read_command_client(char* buf, int size, struct command *cstruct);
 void client_show_list(SSL* ssl, char* server_ip);
 void client_get_file(SSL* ssl, char* server_ip, struct command cmd) ;

@@ -102,9 +102,12 @@ void run_server(int argc, char **argv) {
                 return;
             }
 
-            if (authenticateUserSSL(ssl)) {
-                handle_ftp_command(ssl, connfd, data_port);
-            } else {
+            SSL_write(ssl, "Handshake!", sizeof ("Handshake!"));
+
+            //if (authenticateUserSSL(ssl)) {
+               while(true)
+                   handle_ftp_command(ssl, connfd, data_port);
+            /*} else {
                 char new_username[256];
                 char new_password[256];
 
@@ -114,7 +117,7 @@ void run_server(int argc, char **argv) {
                 addUser(new_username, new_password);
 
                 SSL_write(ssl, "New user added successfully", strlen("New user added successfully"));
-            }
+            }*/
 
             close(connfd);
             SSL_free(ssl);
