@@ -49,3 +49,4 @@ libs/
 /client/cmake-build-debug/
 /server/cmake-build-debug/
 /server/build/
+cmake-build-debug
