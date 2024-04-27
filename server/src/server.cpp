@@ -2,7 +2,7 @@
 
 std::string root_directory;
 
-void handle_ftp_command(SSL *ssl, int connfd, int data_port) {
+bool handle_ftp_command(SSL *ssl, int connfd, int data_port) {
     char command[MAXLINE];
     SSL_read(ssl, command, sizeof(command));
 
@@ -22,9 +22,12 @@ void handle_ftp_command(SSL *ssl, int connfd, int data_port) {
         char filename[MAXLINE];
         SSL_read(ssl, filename, sizeof(filename));
         handle_get_command(ssl, data_port, filename);
+    } else if (strncmp(command, "quit", 4) == 0) {
+        return false;
     } else {
         std::cerr << "Unknown command: " << command << std::endl;
     }
+    return true;
 }
 
 void run_server(int argc, char **argv) {
@@ -105,8 +108,7 @@ void run_server(int argc, char **argv) {
             SSL_write(ssl, "Handshake!", sizeof ("Handshake!"));
 
             //if (authenticateUserSSL(ssl)) {
-               while(true)
-                   handle_ftp_command(ssl, connfd, data_port);
+               while(handle_ftp_command(ssl, connfd, data_port));
             /*} else {
                 char new_username[256];
                 char new_password[256];
