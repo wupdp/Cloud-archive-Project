@@ -6,6 +6,7 @@
 #include <netinet/in.h>
 #include <fstream>
 #include <string.h>
+#include <cstring>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <openssl/ssl.h>
@@ -20,6 +21,7 @@
 #endif
 
 #define BUFFER_SIZE 4096
+#define MAXLINE 1024
 
 struct command {
     char code[250];
@@ -30,7 +32,7 @@ struct command {
 void menu_client();
 void read_input(char* buffer, int size);
 int read_command_client(char* buf, int size, struct command *cstruct);
-void client_show_list(SSL* ssl, char* server_ip);
+void client_show_list(SSL* ssl);
 void client_get_file(SSL* ssl, char* server_ip, struct command cmd) ;
 void client_put_file(SSL* ssl, char* server_ip, struct command cmd);
 void client_cd_action(SSL* ssl, struct command cmd);

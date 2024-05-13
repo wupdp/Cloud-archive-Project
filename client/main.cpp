@@ -106,8 +106,7 @@ int main(int argc, char **argv)
             break;
         }
         else if (strcmp(cmd.code, "LS") == 0) {
-            cout << "Executing client_show_list..." << endl;
-            client_show_list(ssl, server_ip);
+            client_show_list(ssl);
         }
         else if (strcmp(cmd.code, "GET") == 0) {
             cout << "Getting file..." << endl;

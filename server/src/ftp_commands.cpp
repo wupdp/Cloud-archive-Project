@@ -6,7 +6,6 @@ SSL_CTX *ctx = SSL_CTX_new(TLS_server_method());
 void handle_ls_command(SSL* ssl) {
     // Реализация команды ls
     std::string curr_dir = get_current_dir();
-    chdir(root_directory.c_str());
 
     FILE *in;
     char temp[MAXLINE];
@@ -40,36 +39,37 @@ void handle_ls_command(SSL* ssl) {
 void handle_pwd_command(SSL* ssl) {
     // Реализация команды pwd
     std::string curr_dir = get_current_dir();
-    SSL_write(ssl, curr_dir.c_str(), curr_dir.length());
+    SSL_write(ssl, curr_dir.c_str(), curr_dir.length()+1);
 }
 
 void handle_cd_command(SSL* ssl, const char* directory) {
-    // Реализация команды cd
-    if(strcmp(directory, "..") == 0) {
-        if(chdir("..")<0){
-            SSL_write(ssl, "0", MAXLINE);
-        }
-        else{
-            char cwd[1024];
-            if (getcwd(cwd, sizeof(cwd)) != NULL) {
-                root_directory = std::string(cwd);
+    std::string current_dir = get_current_dir();
+    std::string new_dir = directory;
+
+    // Если переданный путь - "..", то перейдем на уровень выше
+    if (new_dir == "..") {
+        // Проверяем, что мы не находимся в корневой директории
+        if (current_dir != "/") {
+            size_t found = current_dir.find_last_of("/\\");
+            if (found != std::string::npos) {
+                current_dir = current_dir.substr(0, found);
+                if (chdir(current_dir.c_str()) != -1) {
+                    SSL_write(ssl, "1", MAXLINE);
+                    return;
+                }
             }
+        }
+    } else {
+        // Иначе объединим текущий путь и переданный путь
+        new_dir = current_dir + "/" + directory;
+        if (chdir(new_dir.c_str()) != -1) {
             SSL_write(ssl, "1", MAXLINE);
+            return;
         }
     }
-    else {
-        std::string new_dir = root_directory + "/" + directory;
-        if(chdir(new_dir.c_str())<0){
-            SSL_write(ssl, "0", MAXLINE);
-        }
-        else{
-            char cwd[1024];
-            if (getcwd(cwd, sizeof(cwd)) != NULL) {
-                root_directory = std::string(cwd);
-            }
-            SSL_write(ssl, "1", MAXLINE);
-        }
-    }
+
+    // Если chdir не удалось или пытаемся вернуться из корневой директории, отправим сообщение об ошибке
+    SSL_write(ssl, "0", MAXLINE);
 }
 
 void handle_put_command(SSL* ssl, int data_port, const char* filename) {

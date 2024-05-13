@@ -89,7 +89,7 @@ int read_command_client(char* buf, int size, struct command *cstruct)
     return 0;
 }
 
-void client_show_list(SSL* ssl, char* server_ip) {
+void client_show_list(SSL* ssl) {
     char buff[BUFFER_SIZE], check[BUFFER_SIZE]="1", port[BUFFER_SIZE];
     SSL_read(ssl, port, BUFFER_SIZE);
     while(strcmp("1", check) == 0) {
@@ -175,13 +175,19 @@ void client_put_file(SSL* ssl, char* server_ip, struct command cmd) {
 }
 
 void client_cd_action(SSL* ssl, struct command cmd) {
-    char check[BUFFER_SIZE];
-    cout << "Given path: " << cmd.arg << endl;
-    SSL_read(ssl, check, BUFFER_SIZE);
-    if (strcmp("0", check) == 0) {
-        cerr << "Directory doesn't exist. Check Path" << endl;
+    char response[MAXLINE];
+
+    // Формируем команду cd для отправки на сервер
+    SSL_write(ssl, cmd.arg, strlen(cmd.arg));
+
+    // Получаем ответ от сервера
+    SSL_read(ssl, response, MAXLINE);
+
+    // Проверяем ответ от сервера и выводим соответствующее сообщение
+    if (strcmp(response, "0") == 0) {
+        std::cerr << "Error: Invalid path" << std::endl;
     } else {
-        cout << "Directory changed successfully" << endl;
+        std::cout << "Directory changed successfully" << std::endl;
     }
 }
 

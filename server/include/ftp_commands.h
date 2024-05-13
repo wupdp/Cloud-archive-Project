@@ -2,9 +2,9 @@
 #define FTP_COMMANDS_H
 
 #define MAXLINE 4096 /*max text line length*/
+#define BUFFER_SIZE 1024
 #define LISTENQ 8 /*maximum number of client connections*/
 
-#include "../include/socket.h"
 #include "../include/utilities.h"
 
 #include <openssl/ssl.h>
