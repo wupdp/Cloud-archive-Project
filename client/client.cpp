@@ -109,36 +109,47 @@ void client_show_list(SSL* ssl) {
 }
 
 void client_get_file(SSL* ssl, char* server_ip, struct command cmd) {
-    char port[BUFFER_SIZE], buffer[BUFFER_SIZE];
+    char port[BUFFER_SIZE], buffer[MAXLINE];
     char char_num_blks[BUFFER_SIZE], char_num_last_blk[BUFFER_SIZE], message[BUFFER_SIZE];
     int num_blks, num_last_blk, i;
     FILE* fp;
+
+    // Читаем порт и сообщение о статусе файла
     SSL_read(ssl, port, BUFFER_SIZE);
     SSL_read(ssl, message, BUFFER_SIZE);
+
     if (strcmp("1", message) == 0) {
-        if ((fp = fopen(cmd.arg, "w")) == NULL)
-            cout << "Error in creating file\n";
-        else {
+        // Создаем файл для записи
+        if ((fp = fopen(cmd.arg, "wb")) == NULL) {
+            std::cerr << "Error in creating file" << std::endl;
+        } else {
+            // Читаем количество блоков данных
             SSL_read(ssl, char_num_blks, BUFFER_SIZE);
             num_blks = atoi(char_num_blks);
-            for(i = 0; i < num_blks; i++) {
-                SSL_read(ssl, buffer, BUFFER_SIZE);
-                fwrite(buffer, sizeof(char), BUFFER_SIZE, fp);
+
+            // Читаем и записываем блоки данных в файл
+            for (i = 0; i < num_blks; i++) {
+                SSL_read(ssl, buffer, MAXLINE);
+                fwrite(buffer, sizeof(char), MAXLINE, fp);
             }
+
+            // Читаем размер последнего блока данных
             SSL_read(ssl, char_num_last_blk, BUFFER_SIZE);
             num_last_blk = atoi(char_num_last_blk);
             if (num_last_blk > 0) {
-                SSL_read(ssl, buffer, BUFFER_SIZE);
+                // Читаем и записываем последний блок данных в файл
+                SSL_read(ssl, buffer, num_last_blk);
                 fwrite(buffer, sizeof(char), num_last_blk, fp);
             }
+
             fclose(fp);
-            cout << "File <" << cmd.arg << "> downloaded successfully." << endl;
+            std::cout << "File <" << cmd.arg << "> downloaded successfully." << std::endl;
         }
-    }
-    else {
-        cerr << "Error in opening file. Check filename\nUsage: put filename" << endl;
+    } else {
+        std::cerr << "Error in opening file. Check filename" << std::endl;
     }
 }
+
 
 void client_put_file(SSL* ssl, char* server_ip, struct command cmd) {
     char port[BUFFER_SIZE], buffer[BUFFER_SIZE], char_num_blks[BUFFER_SIZE];
@@ -176,13 +187,10 @@ void client_put_file(SSL* ssl, char* server_ip, struct command cmd) {
 
 void client_cd_action(SSL* ssl, struct command cmd) {
     char response[MAXLINE];
-
     // Формируем команду cd для отправки на сервер
     SSL_write(ssl, cmd.arg, strlen(cmd.arg));
-
     // Получаем ответ от сервера
     SSL_read(ssl, response, MAXLINE);
-
     // Проверяем ответ от сервера и выводим соответствующее сообщение
     if (strcmp(response, "0") == 0) {
         std::cerr << "Error: Invalid path" << std::endl;

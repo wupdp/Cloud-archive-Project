@@ -15,14 +15,17 @@ bool handle_ftp_command(SSL *ssl, int data_port) {
         char directory[MAXLINE];
         SSL_read(ssl, directory, sizeof(directory));
         handle_cd_command(ssl, directory);
+        memset(directory, 0, sizeof (directory));
     } else if (strncmp(command, "put", 3) == 0) {
         char filename[MAXLINE];
         SSL_read(ssl, filename, sizeof(filename));
         handle_put_command(ssl, data_port, filename);
+        memset(filename, 0, sizeof (filename));
     } else if (strncmp(command, "get", 3) == 0) {
         char filename[MAXLINE];
         SSL_read(ssl, filename, sizeof(filename));
         handle_get_command(ssl, data_port, filename);
+        memset(filename, 0, sizeof (filename));
     } else if (strncmp(command, "quit", 4) == 0) {
         return false;
     } else {

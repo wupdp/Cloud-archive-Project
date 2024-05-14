@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <iostream>
+#include <limits.h>
 
 extern std::string root_directory;
 
