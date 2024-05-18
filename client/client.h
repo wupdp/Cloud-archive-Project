@@ -37,3 +37,4 @@ void client_get_file(SSL* ssl, char* server_ip, struct command cmd) ;
 void client_put_file(SSL* ssl, char* server_ip, struct command cmd);
 void client_cd_action(SSL* ssl, struct command cmd);
 void client_pwd_action(SSL* ssl);
+int create_socket(int port,char *addr);

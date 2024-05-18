@@ -7,8 +7,7 @@ std::string get_current_dir() {
     return (getcwd(temp, sizeof(temp)) ? std::string(temp) : std::string(""));
 }
 
-int create_socket(int port)
-{
+int create_socket(int port) {
     int sockfd;
     struct sockaddr_in servaddr;
 
@@ -23,7 +22,7 @@ int create_socket(int port)
     memset(&servaddr, 0, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr= htonl(INADDR_ANY);
-    servaddr.sin_port =  htons(port); //convert to big-endian order
+    servaddr.sin_port = htons(port); //convert to big-endian order
 
     //Bind the socket
     if (bind(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr))<0) {

@@ -3,7 +3,7 @@
 
 std::string root_directory;
 
-bool handle_ftp_command(SSL *ssl, int data_port) {
+bool handle_ftp_command(SSL *ssl, int* data_port) {
     char command[MAXLINE];
     SSL_read(ssl, command, sizeof(command));
 
@@ -35,11 +35,12 @@ bool handle_ftp_command(SSL *ssl, int data_port) {
 }
 
 void run_server(int argc, char **argv) {
-    int data_port = 1024;
     int listenfd, connfd;
     pid_t childpid;
     socklen_t clilen;
     struct sockaddr_in cliaddr{}, servaddr;
+
+    int data_port = 1024;
 
     if (argc != 3) {
         std::cerr << "Usage: ./server_ssl <port number> <root directory>" << std::endl;
@@ -120,7 +121,7 @@ void run_server(int argc, char **argv) {
             SSL_write(ssl, "Handshake!", sizeof ("Handshake!"));
 
             //if (authenticateUserSSL(ssl)) {
-               while(handle_ftp_command(ssl, data_port));
+                while(handle_ftp_command(ssl, &data_port));
             /*} else {
                 char new_username[256];
                 char new_password[256];

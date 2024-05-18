@@ -109,11 +109,9 @@ int main(int argc, char **argv)
             client_show_list(ssl);
         }
         else if (strcmp(cmd.code, "GET") == 0) {
-            cout << "Getting file..." << endl;
             client_get_file(ssl, server_ip, cmd);
         }
         else if (strcmp(cmd.code, "PUT") == 0) {
-            cout << "Putting file..." << endl;
             client_put_file(ssl, server_ip, cmd);
         }
         else if (strcmp(cmd.code, "CD") == 0) {
