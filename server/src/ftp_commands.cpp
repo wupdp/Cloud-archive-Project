@@ -70,10 +70,9 @@ void handle_cd_command(SSL *ssl, const char *directory) {
 }
 
 void handle_get_command(SSL *ssl, int *data_port, const char *filename) {
-
     // Проверяем существование файла на сервере
     if (access(filename, F_OK) != -1) {
-        SSL_write(ssl, "1", strlen("1"));
+        SSL_write(ssl, "1", strlen("1") + 1);
 
         char port[MAXLINE], buffer[MAXLINE], char_num_blks[MAXLINE], char_num_last_blk[MAXLINE];
         int datasock, lSize, num_blks, num_last_blk, i;
@@ -81,15 +80,14 @@ void handle_get_command(SSL *ssl, int *data_port, const char *filename) {
 
         // Создаем сокет для передачи данных
         (*data_port)++;
-
         sprintf(port, "%d", (*data_port));
         datasock = create_socket((*data_port));
-        SSL_write(ssl, port, MAXLINE); // Отправляем порт клиенту
+        SSL_write(ssl, port, strlen(port) + 1); // Отправляем порт клиенту
         datasock = accept_conn(datasock); // Принимаем соединение
 
         // Открываем файл для чтения
         if ((fp = fopen(filename, "rb")) != NULL) {
-            SSL_write(ssl, "1", strlen("1"));
+            SSL_write(ssl, "1", strlen("1") + 1);
 
             // Определяем размер файла
             fseek(fp, 0, SEEK_END);
@@ -98,7 +96,8 @@ void handle_get_command(SSL *ssl, int *data_port, const char *filename) {
             num_blks = lSize / MAXLINE;
             num_last_blk = lSize % MAXLINE;
             sprintf(char_num_blks, "%d", num_blks);
-            SSL_write(ssl, char_num_blks, MAXLINE); // Отправляем количество блоков клиенту
+            // Отправляем количество блоков клиенту
+            SSL_write(ssl, char_num_blks, strlen(char_num_blks) + 1);
 
             // Читаем и отправляем содержимое файла по блокам
             for (i = 0; i < num_blks; i++) {
@@ -108,65 +107,92 @@ void handle_get_command(SSL *ssl, int *data_port, const char *filename) {
 
             // Отправляем последний блок данных
             sprintf(char_num_last_blk, "%d", num_last_blk);
-            SSL_write(ssl, char_num_last_blk, MAXLINE);
+            SSL_write(ssl, char_num_last_blk, strlen(char_num_last_blk) + 1);
 
             if (num_last_blk > 0) {
                 fread(buffer, sizeof(char), num_last_blk, fp);
-                send(datasock, buffer, MAXLINE, 0);
+                send(datasock, buffer, num_last_blk, 0);
             }
 
             fclose(fp);
         } else {
-            SSL_write(ssl, "0", strlen("0")); // Отправляем код ошибки (файл не найден)
+            SSL_write(ssl, "0", strlen("0") + 1); // Отправляем код ошибки (файл не найден)
         }
 
         close(datasock);
     } else {
-        SSL_write(ssl, "0", strlen("0"));
+        SSL_write(ssl, "0", strlen("0") + 1);
         std::cerr << "File <" << filename << "> does not exist" << std::endl;
     }
 }
 
 void handle_put_command(SSL *ssl, int *data_port, const char *filename) {
-
     char port[MAXLINE], buffer[MAXLINE], char_num_blks[MAXLINE], char_num_last_blk[MAXLINE];
     int num_blks, num_last_blk, i;
     char message[BUFFER_SIZE];
     FILE *fp;
 
-    // Создаем новый сокет для передачи данных
+    // Создание нового сокета для передачи данных
     (*data_port)++;
-
     sprintf(port, "%d", (*data_port));
     int datasock = create_socket((*data_port));
-    SSL_write(ssl, port, MAXLINE); // Отправляем порт клиенту
+    if (datasock < 0) {
+        std::cerr << "Failed to create data socket" << std::endl;
+        SSL_write(ssl, "ERROR", strlen("ERROR") + 1);
+        return;
+    } else {
+        SSL_write(ssl, "SUCCESS", strlen("SUCCESS") + 1);
+    }
+
+    SSL_write(ssl, port, strlen(port) + 1); // Отправляем порт клиенту
+
+    SSL_read(ssl, message, sizeof(message));
+    if (strcmp(message, "ERROR") == 0) {
+        std::cerr << "Client cannot create data socket" << std::endl;
+        return;
+    }
+
     datasock = accept_conn(datasock);
+    if (datasock < 0) {
+        std::cerr << "Failed to accept data connection" << std::endl;
+        SSL_write(ssl, "ERROR", strlen("ERROR") + 1);
+        return;
+    } else {
+        SSL_write(ssl, "SUCCESS", strlen("SUCCESS") + 1);
+    }
 
-    SSL_read(ssl, message, strlen("1"));
-    if(strcmp("1", message) == 0) {
-        if ((fp = fopen(filename, "wb")) != NULL) {
+    SSL_read(ssl, message, sizeof(message));
+    if (strcmp("1", message) == 0) {
+        fp = fopen(filename, "wb");
+        if (fp != NULL) {
+            // Уведомляем клиент, что готовы принимать данные
+            SSL_write(ssl, "READY", strlen("READY") + 1);
 
-            SSL_read(ssl, char_num_blks, MAXLINE);
+            SSL_read(ssl, char_num_blks, sizeof(char_num_blks));
             num_blks = atoi(char_num_blks);
-            // Читаем и записываем блоки данных в файл
+
+            // Чтение и запись блоков данных в файл
             for (i = 0; i < num_blks; i++) {
-                recv(datasock, buffer, MAXLINE, 0);
-                fwrite(buffer, sizeof(char), MAXLINE, fp);
+                int bytes_received = recv(datasock, buffer, sizeof(buffer), 0);
+                fwrite(buffer, sizeof(char), bytes_received, fp);
             }
 
-            // Читаем размер последнего блока данных
-            SSL_read(ssl, char_num_last_blk, BUFFER_SIZE);
-
+            // Чтение размера последнего блока данных
+            SSL_read(ssl, char_num_last_blk, sizeof(char_num_last_blk));
             num_last_blk = atoi(char_num_last_blk);
             if (num_last_blk > 0) {
-                // Читаем и записываем последний блок данных в файл
-                recv(datasock, buffer, MAXLINE, 0);
-                fwrite(buffer, sizeof(char), num_last_blk, fp);
+                int bytes_received = recv(datasock, buffer, num_last_blk, 0);
+                fwrite(buffer, sizeof(char), bytes_received, fp);
             }
             fclose(fp);
         } else {
-            std::cerr << "Error in creating file on server side" << std::endl;
+            std::cerr << "Error creating file on server side" << std::endl;
+            SSL_write(ssl, "ERROR", strlen("ERROR") + 1);
+            return;
         }
+    } else {
+        std::cerr << "Client failed to initialize file transfer" << std::endl;
+        SSL_write(ssl, "ERROR", strlen("ERROR") + 1);
     }
 
     close(datasock);

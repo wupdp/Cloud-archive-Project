@@ -101,11 +101,10 @@ void client_show_list(SSL *ssl) {
 }
 
 void client_get_file(SSL *ssl, char *server_ip, struct command cmd) {
-
-    SSL_write(ssl, cmd.arg, strlen(cmd.arg));
+    SSL_write(ssl, cmd.arg, strlen(cmd.arg) + 1);
 
     char message[BUFFER_SIZE];
-    SSL_read(ssl, message, strlen("1"));
+    SSL_read(ssl, message, sizeof(message));
 
     if (strcmp("1", message) == 0) {
         char port[BUFFER_SIZE], buffer[MAXLINE];
@@ -114,20 +113,18 @@ void client_get_file(SSL *ssl, char *server_ip, struct command cmd) {
         FILE *fp;
 
         // Читаем порт и сообщение о статусе файла
-        SSL_read(ssl, port, BUFFER_SIZE);
+        SSL_read(ssl, port, sizeof(port));
 
         data_port = atoi(port);
         datasock = create_socket(data_port, server_ip);
 
-        SSL_read(ssl, message, strlen("1"));
+        SSL_read(ssl, message, sizeof(message));
 
         if (strcmp("1", message) == 0) {
             // Создаем файл для записи
             if ((fp = fopen(cmd.arg, "wb")) != NULL) {
                 // Читаем количество блоков данных
-                SSL_read(ssl, char_num_blks, BUFFER_SIZE);
-
-
+                SSL_read(ssl, char_num_blks, sizeof(char_num_blks));
                 num_blks = atoi(char_num_blks);
 
                 // Читаем и записываем блоки данных в файл
@@ -137,12 +134,11 @@ void client_get_file(SSL *ssl, char *server_ip, struct command cmd) {
                 }
 
                 // Читаем размер последнего блока данных
-                SSL_read(ssl, char_num_last_blk, BUFFER_SIZE);
-
+                SSL_read(ssl, char_num_last_blk, sizeof(char_num_last_blk));
                 num_last_blk = atoi(char_num_last_blk);
                 if (num_last_blk > 0) {
                     // Читаем и записываем последний блок данных в файл
-                    recv(datasock, buffer, MAXLINE, 0);
+                    recv(datasock, buffer, num_last_blk, 0);
                     fwrite(buffer, sizeof(char), num_last_blk, fp);
                 }
                 fclose(fp);
@@ -160,50 +156,78 @@ void client_get_file(SSL *ssl, char *server_ip, struct command cmd) {
 }
 
 void client_put_file(SSL *ssl, char *server_ip, struct command cmd) {
-
-    SSL_write(ssl, cmd.arg, strlen(cmd.arg));
+    SSL_write(ssl, cmd.arg, strlen(cmd.arg) + 1);
 
     char port[BUFFER_SIZE], buffer[BUFFER_SIZE], char_num_blks[BUFFER_SIZE];
     char char_num_last_blk[BUFFER_SIZE];
     int lSize, num_blks, num_last_blk, i;
     FILE *fp;
-    SSL_read(ssl, port, BUFFER_SIZE);
 
+    // Чтение ответа от сервера
+    char server_response[BUFFER_SIZE];
+    SSL_read(ssl, server_response, sizeof(server_response));
+    if (strcmp(server_response, "ERROR") == 0) {
+        std::cerr << "Server reported an error: " << server_response << std::endl;
+        return;
+    }
+
+    SSL_read(ssl, port, sizeof(port));
     int data_port = atoi(port);
     int datasock = create_socket(data_port, server_ip);
+    if (datasock < 0) {
+        std::cerr << "Failed to create data socket" << std::endl;
+        SSL_write(ssl, "ERROR", strlen("ERROR") + 1);
+        return;
+    } else {
+        SSL_write(ssl, "SUCCESS", strlen("SUCCESS") + 1);
+    }
 
-    if ((fp = fopen(cmd.arg, "rb")) != NULL) {
-        SSL_write(ssl, "1", BUFFER_SIZE);
+    SSL_read(ssl, server_response, sizeof(server_response));
+    if (strcmp(server_response, "ERROR") == 0) {
+        std::cerr << "Server failed to accept data connection" << std::endl;
+        return;
+    }
+
+    fp = fopen(cmd.arg, "rb");
+    if (fp != NULL) {
+        SSL_write(ssl, "1", strlen("1") + 1);
+        SSL_read(ssl, server_response, sizeof(server_response));
+        if (strcmp(server_response, "ERROR") == 0) {
+            std::cerr << "Error creating file on server side" << std::endl;
+            return;
+        }
 
         fseek(fp, 0, SEEK_END);
         lSize = ftell(fp);
         rewind(fp);
         num_blks = lSize / BUFFER_SIZE;
         num_last_blk = lSize % BUFFER_SIZE;
+
         sprintf(char_num_blks, "%d", num_blks);
-        SSL_write(ssl, char_num_blks, BUFFER_SIZE);
-        // Читаем и отправляем содержимое файла по блокам
+        SSL_write(ssl, char_num_blks, strlen(char_num_blks) + 1);
+
+        // Чтение и отправка содержимого файла по блокам
         for (i = 0; i < num_blks; i++) {
-            fread(buffer, sizeof(char), MAXLINE, fp);
-            send(datasock, buffer, MAXLINE, 0);
+            fread(buffer, sizeof(char), BUFFER_SIZE, fp);
+            send(datasock, buffer, BUFFER_SIZE, 0);
         }
 
-        // Отправляем последний блок данных
+        // Отправка последнего блока данных
         sprintf(char_num_last_blk, "%d", num_last_blk);
-        SSL_write(ssl, char_num_last_blk, MAXLINE);
+        SSL_write(ssl, char_num_last_blk, strlen(char_num_last_blk) + 1);
 
         if (num_last_blk > 0) {
             fread(buffer, sizeof(char), num_last_blk, fp);
-            send(datasock, buffer, MAXLINE, 0);
+            send(datasock, buffer, num_last_blk, 0);
         }
         fclose(fp);
-        cout << "File <" << cmd.arg << "> uploaded successfully.\n";
     } else {
-        SSL_write(ssl, "0", BUFFER_SIZE);
-        cerr << "Error in opening file. Check filename" << endl;
+        SSL_write(ssl, "0", strlen("0") + 1);
+        std::cerr << "Error in opening file. Check filename" << std::endl;
     }
     close(datasock);
 }
+
 
 void client_cd_action(SSL *ssl, struct command cmd) {
     char response[MAXLINE];
