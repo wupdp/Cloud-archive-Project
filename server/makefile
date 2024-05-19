@@ -3,11 +3,11 @@ CFLAGS_COMMON = -std=c++11 -Wall -Os -fPIE
 CFLAGS_DEBUG = $(CFLAGS_COMMON) -g -ggdb
 CFLAGS_RELEASE = $(CFLAGS_COMMON) -Werror
 
-LDFLAGS = -lssl -lcrypto -lncursesw
+LDFLAGS = -lssl -lcrypto
 
-SRCS = main.cpp client.cpp
+SRCS = src/authentification.cpp src/main.cpp src/server.cpp src/socket.cpp src/utilities.cpp src/ftp_commands.cpp
 OBJS = $(SRCS:.cpp=.o)
-EXEC = ftclient
+EXEC = ftserve
 
 .PHONY: all clean
 
@@ -20,7 +20,7 @@ else
 	$(CC) $(CFLAGS_RELEASE) $(OBJS) -o $(EXEC) $(LDFLAGS)
 endif
 
-%.o: %.cpp client.h
+%.o: %.cpp include/authentification.h include/server.h include/socket.h include/utilities.h include/ftp_commands.h
 	$(CC) $(CFLAGS_COMMON) -c $< -o $@
 
 clean:

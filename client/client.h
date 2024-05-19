@@ -10,6 +10,9 @@
 #include <netdb.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <ncurses.h> // Подключение библиотеки ncurses.h
+#include <wchar.h>
+#include <locale.h> // Подключение библиотеки locale.h
 
 #ifdef WINDOWS
 #include <direct.h>
@@ -27,7 +30,7 @@ struct command {
     char arg[50];
 };
 
-void menu_client();
+void print_menu();
 void read_input(char* buffer, int size);
 int read_command_client(char* buf, int size, struct command *cstruct);
 void client_show_list(SSL* ssl, char* server_ip);
@@ -35,3 +38,4 @@ void client_get_file(SSL* ssl, char* server_ip, struct command cmd) ;
 void client_put_file(SSL* ssl, char* server_ip, struct command cmd);
 void client_cd_action(SSL* ssl, struct command cmd);
 void client_pwd_action(SSL* ssl);
+int authentification(SSL* ssl);

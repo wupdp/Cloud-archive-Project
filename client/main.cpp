@@ -90,42 +90,138 @@ int main(int argc, char **argv)
         server_message[bytes] = 0;
         printf("%s\n", server_message);
     }
+    
+   // use_default_colors();
 
-    menu_client();
+    setlocale(LC_ALL, "");
+    initscr(); // Инициализация структуры экрана
+    start_color();	
+    cbreak(); // Включение режима посимвольного ввода
+    //noecho(); // Отключение отображения введенных символов
+    keypad(stdscr, TRUE); // Разрешение обработки функциональных клавиш
+
+    int attempt = 0;
+    if (authentification(ssl) != 0) {
+        endwin();
+        echo();
+        printf("New user added!\n");
+
+        // Clean up
+        SSL_shutdown(ssl);
+        close(sockfd);
+        SSL_free(ssl);
+        SSL_CTX_free(ctx);
+        exit(6);
+    }
+
+    clear();
+    print_menu();
+
     struct command cmd;
     while (1) {
         if (read_command_client(buffer, sizeof buffer, &cmd) < 0) {
-            printf("Invalid command\n");
+            init_pair(6, COLOR_RED, COLOR_BLACK);
+            attron(COLOR_PAIR(6));
+            move(getcury(stdscr), 0); // Перемещение курсора в начало строки
+            printw("Invalid command\n");
+            attroff(COLOR_PAIR(6));
+            refresh();
             continue;
         }
 
         SSL_write(ssl, cmd.serv_code, BUFFER_SIZE);
 
         if (strcmp(cmd.code, "QUIT") == 0) {
-            printf("Quit command...\n");
+            clear();
+            move(getcury(stdscr), 0); // Перемещение курсора в начало строки
+            printw("Quit command...\n");
+            refresh();
             break;
         }
         else if (strcmp(cmd.code, "LS") == 0) {
-            cout << "Executing client_show_list..." << endl;
+            clear();
+            init_pair(5, COLOR_GREEN, COLOR_BLACK);
+            attron(COLOR_PAIR(5));
+            move(getcury(stdscr), 0); // Перемещение курсора в начало строки
+            printw("Executing client_show_list...\n");
+            attroff(COLOR_PAIR(5));
+            refresh();
+            move(getcury(stdscr)+1, 0);
             client_show_list(ssl, server_ip);
         }
         else if (strcmp(cmd.code, "GET") == 0) {
-            cout << "Getting file..." << endl;
+            clear();
+            move(getcury(stdscr), 0);
+            init_pair(5, COLOR_GREEN, COLOR_BLACK);
+            attron(COLOR_PAIR(5));
+            printw("Getting file...\n");
+            attroff(COLOR_PAIR(5));
+            refresh();
+            move(getcury(stdscr)+1, 0);
+            SSL_write(ssl, cmd.arg, BUFFER_SIZE);
             client_get_file(ssl, server_ip, cmd);
         }
         else if (strcmp(cmd.code, "PUT") == 0) {
-            cout << "Putting file..." << endl;
+            clear();
+            init_pair(5, COLOR_GREEN, COLOR_BLACK);
+            attron(COLOR_PAIR(5));
+            move(getcury(stdscr), 0);
+            printw("Putting file...\n");
+            attroff(COLOR_PAIR(5));
+            refresh();
+            move(getcury(stdscr)+1, 0);
+            SSL_write(ssl, cmd.arg, BUFFER_SIZE);
             client_put_file(ssl, server_ip, cmd);
         }
         else if (strcmp(cmd.code, "CD") == 0) {
+            clear();
+            SSL_write(ssl, cmd.arg, BUFFER_SIZE);
             client_cd_action(ssl, cmd);
         }
         else if (strcmp(cmd.code, "PWD") == 0) {
+            clear();
+            move(getcury(stdscr), 0);
             client_pwd_action(ssl);
+        }
+        else if (strcmp(cmd.code, "!LS") == 0) {
+            move(getcury(stdscr), 0);
+            system("ls");
+            refresh();
+            move(getcury(stdscr), 0);
+            printw("done");
+            refresh();
+        }
+        else if (strcmp(cmd.code, "!PWD") == 0) {
+            move(getcury(stdscr), 0);
+            system("pwd");
+            refresh();
+            move(getcury(stdscr), 0);
+            printw("done");
+            refresh();
+        }
+        else if (strcmp(cmd.code, "!CD") == 0) {
+            //cmd.arg = strtok(NULL, " \n");
+            move(getcury(stdscr), 0);
+            printw("Path given is: %s",cmd.arg);
+            refresh();
+            if (chdir(cmd.arg) < 0){
+                move(getcury(stdscr) + 1, 0);
+                printw("Directory doesn't exist. Check path");
+                refresh();
+            }
+            move(getcury(stdscr) + 1, 0);
+        }
+        else if (strcmp(cmd.code, "HELP") == 0) {
+                clear();
+                move(getcury(stdscr), 0);
+                print_menu();
+                move(getcury(stdscr) + 1, 0);
         }
 
     }
 
+    endwin();
+    echo();
     printf("Thank you, buy!\n");
 
     // Clean up

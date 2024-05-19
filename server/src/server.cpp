@@ -8,8 +8,10 @@ bool handle_ftp_command(SSL *ssl, int data_port) {
     SSL_read(ssl, command, sizeof(command));
 
     if (strncmp(command, "ls", 2) == 0) {
+        cout << "ls act" << endl;
         handle_ls_command(ssl);
     } else if (strncmp(command, "pwd", 3) == 0) {
+        cout << "pwd act" << endl;
         handle_pwd_command(ssl);
     } else if (strncmp(command, "cd", 2) == 0) {
         char directory[MAXLINE];
@@ -17,12 +19,13 @@ bool handle_ftp_command(SSL *ssl, int data_port) {
         handle_cd_command(ssl, directory);
     } else if (strncmp(command, "put", 3) == 0) {
         char filename[MAXLINE];
+        cout << "put" << endl;
         SSL_read(ssl, filename, sizeof(filename));
-        handle_put_command(ssl, data_port, filename);
+        handle_get_command(ssl, data_port, filename);
     } else if (strncmp(command, "get", 3) == 0) {
         char filename[MAXLINE];
         SSL_read(ssl, filename, sizeof(filename));
-        handle_get_command(ssl, data_port, filename);
+        handle_put_command(ssl, data_port, filename);
     } else if (strncmp(command, "quit", 4) == 0) {
         return false;
     } else {
@@ -56,12 +59,12 @@ void run_server(int argc, char **argv) {
     } else std::cout << "SSL content creation passed" << std::endl;
 
     // Загрузка сертификата и закрытого ключа
-    if (SSL_CTX_use_certificate_file(ctx, "../server.crt", SSL_FILETYPE_PEM) <= 0) {
+    if (SSL_CTX_use_certificate_file(ctx, "server.crt", SSL_FILETYPE_PEM) <= 0) {
         std::cerr << "Error loading server certificate." << std::endl;
         return;
     } else std::cout << "Loading server certificate passed" << std::endl;
 
-    if (SSL_CTX_use_PrivateKey_file(ctx, "../server.key", SSL_FILETYPE_PEM) <= 0) {
+    if (SSL_CTX_use_PrivateKey_file(ctx, "server.key", SSL_FILETYPE_PEM) <= 0) {
         std::cerr << "Error loading server private key." << std::endl;
         return;
     } else std::cout << "Loading server private key passed" << std::endl;
@@ -116,19 +119,31 @@ void run_server(int argc, char **argv) {
 
             SSL_write(ssl, "Handshake!", sizeof ("Handshake!"));
 
-            //if (authenticateUserSSL(ssl)) {
+            loadUsersFromFile();
+             for (size_t i = 0; i < users.size(); ++i) {
+                std::cout << users[i].username << " " << users[i].password << endl;
+            }
+            std::cout << std::endl;
+
+            if (authenticateUserSSL(ssl)) {
                while(handle_ftp_command(ssl, data_port));
-            /*} else {
+            } else {
                 char new_username[256];
                 char new_password[256];
 
-                SSL_read(ssl, new_username, sizeof(new_username));
-                SSL_read(ssl, new_password, sizeof(new_password));
+                int bytes_read = SSL_read(ssl, new_username, sizeof(new_username));
+                new_username[bytes_read] = '\0';
+                bytes_read = SSL_read(ssl, new_password, sizeof(new_password));
+                new_password[bytes_read] = '\0';
+
+                std::cout << new_username << std::endl;
+                std::cout << new_password << std::endl;
 
                 addUser(new_username, new_password);
+                saveUsersToFile();
 
                 SSL_write(ssl, "New user added successfully", strlen("New user added successfully"));
-            }*/
+            }
 
             close(connfd);
             SSL_free(ssl);

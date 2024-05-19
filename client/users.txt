@@ -1,0 +1,7 @@
+asd 123
+nst c
+nst 12345678
+nst 12345678
+ns 3456
+smth 1234
+qw 1

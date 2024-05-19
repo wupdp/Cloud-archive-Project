@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/gabr/Projects/GitHub/Cloud-archive-Project/server
+CMAKE_SOURCE_DIR = /mnt/c/Users/Настя/Desktop/curs/Cloud-archive-Project/server
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/gabr/Projects/GitHub/Cloud-archive-Project/server/build
+CMAKE_BINARY_DIR = /mnt/c/Users/Настя/Desktop/curs/Cloud-archive-Project/server/build
 
 #=============================================================================
 # Targets provided globally by CMake.
