@@ -44,7 +44,7 @@ bool authenticateUserSSL(SSL* ssl) {
 }
 
 void saveUsersToFile() {
-    const std::string filename = "/mnt/c/users/настя/desktop/curs/cloud-archive-project/server/users.txt";
+    const std::string filename = "./users";
     //FILE* fd = fopen("users.txr", "r");
     std::ofstream outFile(filename); // Открыть файл для записи
     if (!outFile) {
@@ -63,7 +63,7 @@ void saveUsersToFile() {
 }
 
 void loadUsersFromFile() {
-    const std::string filename = "/mnt/c/users/настя/desktop/curs/cloud-archive-project/server/users.txt";
+    const std::string filename = "./users";
     std::ifstream inFile(filename); // Открыть файл для чтения
     if (!inFile) {
         std::cerr << "Error opening file for reading: " << filename << std::endl;

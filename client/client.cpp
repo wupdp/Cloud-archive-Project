@@ -117,55 +117,39 @@ int read_command_client(char* buf, int size, struct command *cstruct)
 }
 
 void client_show_list(SSL* ssl, char* server_ip) {
-    char buff[BUFFER_SIZE], check[BUFFER_SIZE]="1", port[BUFFER_SIZE];
-    
-    //SSL_read(ssl, port, BUFFER_SIZE);
-    int t = 0;
+    char buff[BUFFER_SIZE], check[BUFFER_SIZE] = "1";
+
+    int row = 0;
     int col = 0;
-    buff[0] = '0';
-    while(buff[0] != '2') {
-        //SSL_read(ssl, check, BUFFER_SIZE);
-        if(strcmp("2", check) == 0)
+
+    while (strcmp("1", check) == 0) {
+        SSL_read(ssl, check, BUFFER_SIZE);
+        if (strcmp("0", check) == 0)
             break;
+
         while (1) {
             int bytes = SSL_read(ssl, buff, BUFFER_SIZE - 1);
             if (bytes <= 0)
                 break;
-            buff[bytes] = 0;
-            if (buff[0] == '2') // Если получен специальный символ, прекращаем чтение
+
+            buff[bytes] = '\0';
+            if (buff[0] == '\0') // Если получен специальный символ, прекращаем чтение
                 break;
 
-            if (strlen(buff) > 0) {
-                buff[strlen(buff) - 1] = '\0';
-            }
-            wchar_t new_buff[strlen(buff)];
-
-            size_t len = strlen(buff);
-    
-            mbstowcs(new_buff, buff, sizeof(new_buff) / sizeof(new_buff[0]));
-    
-            new_buff[len] = L'\0';
-
-            if (t == 5) {
-                move(getcury(stdscr)+1, 0);
-                t = 0;
+            if (col > 50) { // Максимальная ширина, после которой начинаем новую строку
                 col = 0;
+                row++;
             }
 
-            if (t != 0) {
-                move(getcury(stdscr), col);
-                col+=30;
-            }
-            t++;
-            mvaddwstr(getcury(stdscr), col, new_buff);
-            //mvprintw(getcury(stdscr), col, buff);
-            //printw("%s", buff);
+            mvprintw(row, col, "%s", buff);
+            col += 20; // Ширина одной "колонки"
             refresh();
         }
         printw("\n");
         refresh();
     }
 }
+
 
 void client_get_file(SSL* ssl, char* server_ip, struct command cmd) {
     char port[BUFFER_SIZE], buffer[BUFFER_SIZE];

@@ -4,7 +4,6 @@
 #define MAXLINE 4096 /*max text line length*/
 #define LISTENQ 8 /*maximum number of client connections*/
 
-#include "../include/socket.h"
 #include "../include/utilities.h"
 
 #include <openssl/ssl.h>
@@ -12,8 +11,10 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <iostream>
+#include <limits.h>
 
 extern std::string root_directory;
+using namespace std;
 
 void handle_ls_command(SSL* ssl);
 void handle_pwd_command(SSL* ssl);

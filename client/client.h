@@ -23,6 +23,7 @@
 #endif
 
 #define BUFFER_SIZE 4096
+#define MAXLINE 1024
 
 struct command {
     char code[250];
