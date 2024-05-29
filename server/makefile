@@ -5,9 +5,9 @@ CFLAGS_RELEASE = $(CFLAGS_COMMON) -Werror
 
 LDFLAGS = -lssl -lcrypto
 
-SRCS = src/authentification.cpp src/main.cpp src/server.cpp src/socket.cpp src/utilities.cpp src/ftp_commands.cpp
+SRCS = src/authentification.cpp src/main.cpp src/server.cpp src/utilities.cpp src/ftp_commands.cpp
 OBJS = $(SRCS:.cpp=.o)
-EXEC = ftserve
+EXEC = ftpserver
 
 .PHONY: all clean
 
@@ -20,7 +20,7 @@ else
 	$(CC) $(CFLAGS_RELEASE) $(OBJS) -o $(EXEC) $(LDFLAGS)
 endif
 
-%.o: %.cpp include/authentification.h include/server.h include/socket.h include/utilities.h include/ftp_commands.h
+%.o: %.cpp include/authentification.h include/server.h include/utilities.h include/ftp_commands.h
 	$(CC) $(CFLAGS_COMMON) -c $< -o $@
 
 clean:

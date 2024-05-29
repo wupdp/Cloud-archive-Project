@@ -7,7 +7,7 @@ LDFLAGS = -lssl -lcrypto -lncursesw
 
 SRCS = main.cpp client.cpp
 OBJS = $(SRCS:.cpp=.o)
-EXEC = ftclient
+EXEC = ftpclient
 
 .PHONY: all clean
 

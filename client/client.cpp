@@ -142,7 +142,7 @@ void client_show_list(SSL* ssl, char* server_ip) {
             }
 
             mvprintw(row, col, "%s", buff);
-            col += 20; // Ширина одной "колонки"
+            col += 40; // Ширина одной "колонки"
             refresh();
         }
         printw("\n");
